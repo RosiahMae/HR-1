@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Admin - Gween's Bake n Brew</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f0ea; 
+            color: #4a332a;
+        }
+        h1, h2, h3, .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* View Management */
+        .admin-view:not(.active) { display: none !important; }
+        .admin-view.active { animation: fadeIn 0.3s ease-in-out; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Kanban Custom Scrollbar */
+        .kanban-col::-webkit-scrollbar { width: 6px; }
+        .kanban-col::-webkit-scrollbar-track { background: transparent; }
+        .kanban-col::-webkit-scrollbar-thumb { background-color: #d1c4bc; border-radius: 10px; }
+        
+        /* Drag and Drop visual feedback */
+        .kanban-card.dragging { opacity: 0.5; transform: scale(0.95); }
+        .kanban-col.drag-over { background-color: #f5e6de; border-color: #cda896; border-style: dashed; }
+    </style>
+</head>
+<body class="selection:bg-[#f5e6de] selection:text-[#4a332a]">
+
+    <!-- ========================================== -->
+    <!-- AUTHENTICATION LAYOUT                      -->
+    <!-- ========================================== -->
+    <div id="auth-layout" class="min-h-screen flex items-center justify-center p-4">
+        
+        <!-- LOGIN VIEW -->
+        <div id="admin-login-view" class="bg-white rounded-3xl p-8 md:p-10 shadow-lg border border-[#e8dcd5] w-full max-w-md animate-in fade-in zoom-in-95 duration-300">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-[#5c4033] text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <i data-lucide="coffee" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-2xl font-serif font-bold text-[#4a332a]">HR Admin Portal</h2>
+                <p class="text-gray-500 text-sm mt-1">Authorized personnel only.</p>
+            </div>
+
+            <!-- Testing Credentials Helper -->
+            <div class="bg-blue-50 border border-blue-200 text-blue-700 p-3 rounded-xl text-xs mb-6 text-center">
+                <p class="font-bold mb-1">Main Admin Account (Pre-registered)</p>
+                <p>Email: <span class="font-mono">john.rey@gweens.com</span></p>
+                <p>Password: <span class="font-mono">Admin@123!</span></p>
+            </div>
+
+            <div id="admin-login-error" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-200 mb-6 text-center"></div>
+
+            <form id="admin-login-form" onsubmit="handleAdminLogin(event)" class="space-y-5">
+                <div>
+                    <label class="text-sm font-bold text-gray-700 block mb-1">Email Address</label>
+                    <input type="email" id="login-email" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all" placeholder="name@gweens.com">
+                </div>
+                <div>
+                    <label class="text-sm font-bold text-gray-700 block mb-1">Password</label>
+                    <input type="password" id="login-password" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                </div>
+                
+                <button type="submit" class="w-full bg-[#5c4033] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#4a332a] transition-colors mt-2 shadow-sm">
+                    Sign In to Dashboard
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                <p class="text-sm text-gray-500">New HR Team Member?</p>
+                <button onclick="switchAuthView('register')" class="text-[#5c4033] font-bold hover:underline mt-1">
+                    Set up your admin account
+                </button>
+            </div>
+        </div>
+
+        <!-- REGISTER VIEW -->
+        <div id="admin-register-view" class="hidden bg-white rounded-3xl p-8 md:p-10 shadow-lg border border-[#e8dcd5] w-full max-w-md animate-in fade-in zoom-in-95 duration-300">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-[#fdf8f5] text-[#5c4033] rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[#f0e4dd]">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Admin Setup</h2>
+                <p class="text-gray-500 text-sm mt-1">Register using your approved HR email.</p>
+            </div>
+
+            <div id="admin-register-error" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-200 mb-6"></div>
+            <div id="admin-register-success" class="hidden bg-green-50 text-green-700 p-3 rounded-lg text-sm font-medium border border-green-200 mb-6 text-center">Account created! Redirecting to login...</div>
+
+            <form id="admin-register-form" onsubmit="handleAdminRegister(event)" class="space-y-4">
+                <div>
+                    <label class="text-sm font-bold text-gray-700 block mb-1">Approved HR Email</label>
+                    <input type="email" id="reg-email" required placeholder="john.rey@gweens.com" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="text-sm font-bold text-gray-700 block mb-1">New Password</label>
+                    <input type="password" id="reg-password" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                    <ul class="text-[10px] text-gray-400 mt-2 list-disc pl-4 space-y-0.5">
+                        <li>At least 8 characters</li>
+                        <li>Contains an uppercase letter</li>
+                        <li>Contains a number</li>
+                        <li>Contains a special character (@, $, !, %, *, ?, &)</li>
+                    </ul>
+                </div>
+                <div>
+                    <label class="text-sm font-bold text-gray-700 block mb-1">Confirm Password</label>
+                    <input type="password" id="reg-confirm" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                </div>
+                
+                <button type="submit" class="w-full bg-[#5c4033] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#4a332a] transition-colors mt-4 shadow-sm">
+                    Create Admin Account
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                <button onclick="switchAuthView('login')" class="text-gray-500 text-sm font-medium hover:text-[#5c4033] transition-colors">
+                    <i data-lucide="arrow-left" class="w-3 h-3 inline"></i> Back to Login
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MAIN APP LAYOUT (Hidden until logged in)   -->
+    <!-- ========================================== -->
+    <div id="app-layout" class="hidden flex h-screen overflow-hidden animate-in fade-in duration-500">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-white border-r border-[#e8dcd5] flex flex-col hidden md:flex z-20 shadow-sm">
+            <div class="p-6 border-b border-[#e8dcd5] flex items-center gap-3">
+                <div class="bg-[#5c4033] p-2 rounded-xl text-white shadow-sm">
+                    <i data-lucide="coffee" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-[#4a332a] leading-tight font-serif">HR Admin</h1>
+                    <p class="text-[10px] text-[#8b6b5d] font-bold tracking-wider uppercase">Talent Acquisition</p>
+                </div>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-4">Modules</p>
+                
+                <button onclick="switchAdminView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5c4033] bg-[#fdf8f5] font-medium transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </button>
+                
+                <button onclick="switchAdminView('pipeline')" id="nav-pipeline" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-[#5c4033] hover:bg-[#fdf8f5] font-medium transition-colors">
+                    <i data-lucide="kanban-square" class="w-5 h-5"></i> Recruitment Pipeline
+                </button>
+                
+                <button onclick="switchAdminView('jobs')" id="nav-jobs" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-[#5c4033] hover:bg-[#fdf8f5] font-medium transition-colors">
+                    <i data-lucide="briefcase" class="w-5 h-5"></i> Job Postings
+                </button>
+
+                <button onclick="switchAdminView('directory')" id="nav-directory" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-[#5c4033] hover:bg-[#fdf8f5] font-medium transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i> Applicant Directory
+                </button>
+
+                <!-- Onboarding Module Button -->
+                <button onclick="switchAdminView('onboarding')" id="nav-onboarding" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-[#5c4033] hover:bg-[#fdf8f5] font-medium transition-colors">
+                    <i data-lucide="clipboard-check" class="w-5 h-5"></i> New Hire Onboarding
+                </button>
+
+                <!-- Performance Module Button -->
+                <button onclick="switchAdminView('performance')" id="nav-performance" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-[#5c4033] hover:bg-[#fdf8f5] font-medium transition-colors">
+                    <i data-lucide="bar-chart-2" class="w-5 h-5"></i> Performance (Initial)
+                </button>
+
+                <!-- Social Recognition Module Button -->
+                <button onclick="switchAdminView('recognition')" id="nav-recognition" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-[#5c4033] hover:bg-[#fdf8f5] font-medium transition-colors">
+                    <i data-lucide="award" class="w-5 h-5"></i> Social Recognition
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-[#e8dcd5]">
+                <div class="flex items-center gap-3 bg-[#fdf8f5] p-3 rounded-xl border border-[#f0e4dd]">
+                    <div class="w-10 h-10 rounded-full bg-[#5c4033] text-white flex items-center justify-center font-bold" id="sidebar-initials">
+                        AD
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <p class="text-sm font-bold truncate" id="sidebar-name">Admin User</p>
+                        <p class="text-xs text-gray-500 truncate" id="sidebar-role">HR Team</p>
+                    </div>
+                    <button onclick="adminLogout()" class="text-gray-400 hover:text-red-500 transition-colors" title="Logout">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col h-screen overflow-hidden">
+            
+            <!-- TOP HEADER -->
+            <header class="h-20 bg-white border-b border-[#e8dcd5] flex items-center justify-between px-8 z-10 shadow-sm">
+                <div class="flex items-center bg-[#f3f0ea] px-4 py-2 rounded-xl w-96 border border-transparent focus-within:border-[#cda896] focus-within:bg-white transition-all">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400 mr-2"></i>
+                    <input type="text" placeholder="Search applicants, jobs..." class="bg-transparent border-none outline-none w-full text-sm placeholder-gray-400">
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <button class="relative p-2 text-gray-400 hover:text-[#5c4033] transition-colors">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <button onclick="openCreateJobModal()" class="flex items-center gap-2 bg-[#5c4033] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4a332a] transition-colors shadow-sm">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Post New Job
+                    </button>
+                </div>
+            </header>
+
+            <!-- SCROLLABLE VIEWS -->
+            <div class="flex-1 overflow-y-auto p-8">
+
+                <!-- 1. DASHBOARD OVERVIEW -->
+                <section id="dashboard-view" class="admin-view active max-w-6xl mx-auto">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Welcome back, <span id="dash-greeting-name">HR Team</span>!</h2>
+                        <p class="text-gray-500">Here's what's happening in Talent Acquisition today.</p>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4">
+                            <div class="bg-blue-50 text-blue-600 p-4 rounded-xl"><i data-lucide="users" class="w-6 h-6"></i></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Total Applicants</p>
+                                <h3 class="text-2xl font-bold text-[#4a332a]" id="stat-total">...</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4">
+                            <div class="bg-amber-50 text-amber-600 p-4 rounded-xl"><i data-lucide="clock" class="w-6 h-6"></i></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Under Review</p>
+                                <h3 class="text-2xl font-bold text-[#4a332a]" id="stat-review">...</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4">
+                            <div class="bg-purple-50 text-purple-600 p-4 rounded-xl"><i data-lucide="calendar" class="w-6 h-6"></i></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Interviews Today</p>
+                                <h3 class="text-2xl font-bold text-[#4a332a]">2</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4">
+                            <div class="bg-green-50 text-green-600 p-4 rounded-xl"><i data-lucide="check-circle" class="w-6 h-6"></i></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Hired This Month</p>
+                                <h3 class="text-2xl font-bold text-[#4a332a]" id="stat-hired">...</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Applications Table -->
+                    <div class="bg-white border border-[#e8dcd5] rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-6 border-b border-[#e8dcd5] flex justify-between items-center">
+                            <h3 class="text-lg font-bold font-serif">Recent Applications</h3>
+                            <button onclick="switchAdminView('pipeline')" class="text-sm text-[#5c4033] font-medium hover:underline">View Pipeline</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-[#fdf8f5] text-gray-500">
+                                    <tr>
+                                        <th class="px-6 py-4 font-medium">Applicant Name</th>
+                                        <th class="px-6 py-4 font-medium">Position</th>
+                                        <th class="px-6 py-4 font-medium">Applied Date</th>
+                                        <th class="px-6 py-4 font-medium">Status</th>
+                                        <th class="px-6 py-4 font-medium">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-[#e8dcd5]" id="recent-applications-table">
+                                    <!-- Injected via JS -->
+                                    <tr><td colspan="5" class="text-center py-4 text-gray-500">Loading data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. RECRUITMENT PIPELINE (KANBAN BOARD) -->
+                <section id="pipeline-view" class="admin-view h-full flex flex-col">
+                    <div class="mb-6 flex justify-between items-end">
+                        <div>
+                            <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Recruitment Pipeline</h2>
+                            <p class="text-gray-500">Drag and drop applicants to update their hiring status.</p>
+                        </div>
+                    </div>
+
+                    <!-- Kanban Board Container -->
+                    <div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-6 pb-4">
+                        
+                        <!-- Column 1: New / Screening -->
+                        <div class="flex flex-col bg-[#e8dcd5]/30 rounded-2xl border border-[#e8dcd5]">
+                            <div class="p-4 border-b border-[#e8dcd5] flex justify-between items-center bg-white/50 rounded-t-2xl">
+                                <h3 class="font-bold flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Screening</h3>
+                                <span class="bg-white text-xs font-bold px-2 py-1 rounded-md border border-gray-200" id="count-Screening">0</span>
+                            </div>
+                            <div class="kanban-col flex-1 p-3 overflow-y-auto space-y-3" id="col-Screening" ondragover="allowDrop(event)" ondrop="drop(event, 'Screening')">
+                                <!-- Cards -->
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Interview -->
+                        <div class="flex flex-col bg-[#e8dcd5]/30 rounded-2xl border border-[#e8dcd5]">
+                            <div class="p-4 border-b border-[#e8dcd5] flex justify-between items-center bg-white/50 rounded-t-2xl">
+                                <h3 class="font-bold flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-amber-500"></div> Interview</h3>
+                                <span class="bg-white text-xs font-bold px-2 py-1 rounded-md border border-gray-200" id="count-Interview">0</span>
+                            </div>
+                            <div class="kanban-col flex-1 p-3 overflow-y-auto space-y-3" id="col-Interview" ondragover="allowDrop(event)" ondrop="drop(event, 'Interview')">
+                                <!-- Cards -->
+                            </div>
+                        </div>
+
+                        <!-- Column 3: Hired / Onboarding -->
+                        <div class="flex flex-col bg-[#e8dcd5]/30 rounded-2xl border border-[#e8dcd5]">
+                            <div class="p-4 border-b border-[#e8dcd5] flex justify-between items-center bg-white/50 rounded-t-2xl">
+                                <h3 class="font-bold flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div> Hired</h3>
+                                <span class="bg-white text-xs font-bold px-2 py-1 rounded-md border border-gray-200" id="count-Hired">0</span>
+                            </div>
+                            <div class="kanban-col flex-1 p-3 overflow-y-auto space-y-3" id="col-Hired" ondragover="allowDrop(event)" ondrop="drop(event, 'Hired')">
+                                <!-- Cards -->
+                            </div>
+                        </div>
+
+                        <!-- Column 4: Rejected -->
+                        <div class="flex flex-col bg-[#e8dcd5]/30 rounded-2xl border border-[#e8dcd5]">
+                            <div class="p-4 border-b border-[#e8dcd5] flex justify-between items-center bg-white/50 rounded-t-2xl">
+                                <h3 class="font-bold flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-red-500"></div> Rejected</h3>
+                                <span class="bg-white text-xs font-bold px-2 py-1 rounded-md border border-gray-200" id="count-Rejected">0</span>
+                            </div>
+                            <div class="kanban-col flex-1 p-3 overflow-y-auto space-y-3" id="col-Rejected" ondragover="allowDrop(event)" ondrop="drop(event, 'Rejected')">
+                                <!-- Cards -->
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- 3. JOB POSTINGS VIEW -->
+                <section id="jobs-view" class="admin-view max-w-6xl mx-auto">
+                     <div class="mb-8 flex justify-between items-end">
+                        <div>
+                            <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Job Postings</h2>
+                            <p class="text-gray-500">Manage active openings on the careers portal.</p>
+                        </div>
+                        <button onclick="openCreateJobModal()" class="bg-[#5c4033] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4a332a] transition-colors shadow-sm">
+                            Create Posting
+                        </button>
+                    </div>
+
+                    <div class="grid gap-4" id="admin-jobs-list">
+                        <!-- Injected via JS -->
+                    </div>
+                </section>
+
+                <!-- 4. APPLICANT DIRECTORY VIEW -->
+                <section id="directory-view" class="admin-view max-w-6xl mx-auto">
+                    <div class="mb-8 flex justify-between items-end">
+                       <div>
+                           <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Applicant Directory</h2>
+                           <p class="text-gray-500">A complete, searchable list of all candidates.</p>
+                       </div>
+                       <div class="flex gap-2">
+                           <button class="bg-white border border-[#e8dcd5] text-[#5c4033] px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#fdf8f5] transition-colors shadow-sm flex items-center gap-2">
+                               <i data-lucide="filter" class="w-4 h-4"></i> Filter
+                           </button>
+                           <button class="bg-white border border-[#e8dcd5] text-[#5c4033] px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#fdf8f5] transition-colors shadow-sm flex items-center gap-2">
+                               <i data-lucide="download" class="w-4 h-4"></i> Export CSV
+                           </button>
+                       </div>
+                   </div>
+
+                   <div class="bg-white border border-[#e8dcd5] rounded-2xl shadow-sm overflow-hidden">
+                       <div class="overflow-x-auto">
+                           <table class="w-full text-left text-sm">
+                               <thead class="bg-[#fdf8f5] text-gray-500 border-b border-[#e8dcd5]">
+                                   <tr>
+                                       <th class="px-6 py-4 font-medium">ID</th>
+                                       <th class="px-6 py-4 font-medium">Applicant Name</th>
+                                       <th class="px-6 py-4 font-medium">Position</th>
+                                       <th class="px-6 py-4 font-medium">Contact</th>
+                                       <th class="px-6 py-4 font-medium">Status</th>
+                                       <th class="px-6 py-4 font-medium text-right">Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody class="divide-y divide-[#e8dcd5]" id="directory-table">
+                                   <!-- Injected via JS -->
+                               </tbody>
+                           </table>
+                       </div>
+                   </div>
+               </section>
+
+               <!-- 5. NEW HIRE ONBOARDING VIEW -->
+               <section id="onboarding-view" class="admin-view max-w-6xl mx-auto">
+                    <div class="mb-8 flex justify-between items-end">
+                       <div>
+                           <h2 class="text-2xl font-serif font-bold text-[#4a332a]">New Hire Onboarding</h2>
+                           <p class="text-gray-500">Track and manage onboarding checklists for new team members.</p>
+                       </div>
+                   </div>
+
+                   <!-- Container for Onboarding Cards -->
+                   <div class="grid gap-6" id="onboarding-list">
+                       <!-- Injected via JS -->
+                   </div>
+               </section>
+
+               <!-- 6. PERFORMANCE MANAGEMENT (INITIAL) VIEW -->
+               <section id="performance-view" class="admin-view max-w-6xl mx-auto">
+                    <div class="mb-8 flex justify-between items-end">
+                       <div>
+                           <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Initial Performance Management</h2>
+                           <p class="text-gray-500">Track 30-60-90 day probationary reviews and role-specific skills for recent hires.</p>
+                       </div>
+                   </div>
+
+                   <!-- Container for Performance Cards -->
+                   <div class="grid gap-6 grid-cols-1 lg:grid-cols-2" id="performance-list">
+                       <!-- Injected via JS -->
+                   </div>
+               </section>
+
+               <!-- 7. SOCIAL RECOGNITION VIEW -->
+               <section id="recognition-view" class="admin-view max-w-6xl mx-auto">
+                    <div class="mb-8 flex justify-between items-end">
+                       <div>
+                           <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Social Recognition</h2>
+                           <p class="text-gray-500">Welcome new hires and celebrate early achievements with Kudos.</p>
+                       </div>
+                       <button onclick="openKudosModal()" class="bg-[#5c4033] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4a332a] transition-colors shadow-sm flex items-center gap-2">
+                            <i data-lucide="award" class="w-4 h-4"></i> Give Kudos
+                        </button>
+                   </div>
+
+                   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                       <!-- Welcome Wall (Main Feed) -->
+                       <div class="lg:col-span-2 space-y-6">
+                           <h3 class="text-lg font-bold font-serif border-b border-[#e8dcd5] pb-2 text-[#4a332a]">Welcome Wall</h3>
+                           <div id="welcome-wall-feed" class="space-y-4">
+                               <!-- Injected via JS -->
+                           </div>
+                       </div>
+
+                       <!-- Kudos Leaderboard / Recent -->
+                       <div class="space-y-6">
+                           <h3 class="text-lg font-bold font-serif border-b border-[#e8dcd5] pb-2 text-[#4a332a]">Recent Kudos</h3>
+                           <div id="kudos-feed" class="space-y-4">
+                               <!-- Injected via JS -->
+                           </div>
+                       </div>
+                   </div>
+               </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Applicant Details Modal (Hidden by default) -->
+    <div id="applicant-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden border border-[#e8dcd5] animate-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-[#e8dcd5] flex justify-between items-start bg-[#fdf8f5]">
+                <div>
+                    <h2 class="text-2xl font-serif font-bold text-[#4a332a]" id="modal-name">Applicant Name</h2>
+                    <p class="text-[#8b6b5d] font-medium" id="modal-job">Applying for: Role</p>
+                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 bg-white p-2 rounded-full shadow-sm">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-500 mb-1">Email Address</p>
+                        <p class="font-medium flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4 text-gray-400"></i> <span id="modal-email">email@example.com</span></p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 mb-1">Phone Number</p>
+                        <p class="font-medium flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4 text-gray-400"></i> <span id="modal-phone">0912</span></p>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-500 mb-2 text-sm">Cover Letter</p>
+                    <div class="bg-gray-50 p-4 rounded-xl text-sm text-gray-700 italic border border-gray-100" id="modal-cover">
+                        "I love coffee and baking..."
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-[#e8dcd5] flex justify-between items-center">
+                    <button id="modal-resume-btn" class="flex items-center gap-2 text-[#5c4033] font-medium px-4 py-2 bg-[#fdf8f5] rounded-lg hover:bg-[#f5e6de]">
+                        <i data-lucide="download" class="w-4 h-4"></i> Download Resume
+                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="closeModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 font-medium hover:bg-gray-50">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Job Modal -->
+    <div id="create-job-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-[#e8dcd5] animate-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-[#e8dcd5] flex justify-between items-center bg-[#fdf8f5]">
+                <h2 class="text-xl font-serif font-bold text-[#4a332a]">Post New Job</h2>
+                <button onclick="closeCreateJobModal()" class="text-gray-400 hover:text-gray-700 bg-white p-2 rounded-full shadow-sm">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="handleCreateJob(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Job Title</label>
+                    <input type="text" name="title" required class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all" placeholder="e.g. Senior Barista">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Department</label>
+                        <select name="department" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                            <option>Beverage & Service</option>
+                            <option>Kitchen</option>
+                            <option>Front of House</option>
+                            <option>Management</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Type</label>
+                        <select name="type" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                            <option>Full-time</option>
+                            <option>Part-time</option>
+                            <option>Contract</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Location</label>
+                        <input type="text" name="location" value="Quezon City" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Salary Range</label>
+                        <input type="text" name="salary" placeholder="e.g. ₱18k - ₱25k" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Description</label>
+                    <textarea name="description" rows="4" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all resize-none" placeholder="Job duties and requirements..."></textarea>
+                </div>
+                <div class="pt-4 flex justify-end gap-2">
+                    <button type="button" onclick="closeCreateJobModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 font-medium hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="bg-[#5c4033] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#4a332a] transition-colors shadow-sm">Post Job</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Performance Evaluation Modal -->
+    <div id="evaluation-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-[#e8dcd5] animate-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-[#e8dcd5] flex justify-between items-center bg-[#fdf8f5]">
+                <h2 class="text-xl font-serif font-bold text-[#4a332a]">Log Evaluation</h2>
+                <button onclick="closeEvaluationModal()" class="text-gray-400 hover:text-gray-700 bg-white p-2 rounded-full shadow-sm">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="handleEvaluationSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="eval-app-id" name="applicant_id">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Overall Score (0-100)</label>
+                    <input type="number" id="eval-score" name="score" min="0" max="100" required class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Skill Checklist</label>
+                    <div id="eval-skills-container" class="space-y-2 max-h-48 overflow-y-auto p-2 border border-gray-100 rounded-xl">
+                        <!-- Checkboxes injected via JS -->
+                    </div>
+                </div>
+                <div class="pt-4 flex justify-end gap-2">
+                    <button type="button" onclick="closeEvaluationModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 font-medium hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="bg-[#5c4033] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#4a332a] transition-colors shadow-sm">Save Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Give Kudos Modal -->
+    <div id="kudos-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-[#e8dcd5] animate-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-[#e8dcd5] flex justify-between items-center bg-[#fdf8f5]">
+                <h2 class="text-xl font-serif font-bold text-[#4a332a]">Give Kudos</h2>
+                <button onclick="closeKudosModal()" class="text-gray-400 hover:text-gray-700 bg-white p-2 rounded-full shadow-sm">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="handleKudosSubmit(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Select Employee</label>
+                    <select id="kudos-target" name="target_id" required class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                        <!-- Options injected via JS -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Badge</label>
+                    <select name="badge" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                        <option value="Star Player">Star Player (Star)</option>
+                        <option value="Fast Learner">Fast Learner (Zap)</option>
+                        <option value="Team Player">Team Player (Users)</option>
+                        <option value="Customer Favorite">Customer Favorite (Heart)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Message</label>
+                    <textarea name="message" required rows="3" class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all resize-none" placeholder="Great job on..."></textarea>
+                </div>
+                <div class="pt-4 flex justify-end gap-2">
+                    <button type="button" onclick="closeKudosModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 font-medium hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="bg-[#5c4033] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#4a332a] transition-colors shadow-sm">Send Kudos</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- REAL DATA ARRAYS ---
+        let APPLICATIONS = [];
+        let JOBS = [];
+        let RECOGNITION_FEED = [];
+
+        // --- ADMIN AUTHENTICATION SYSTEM ---
+        let loggedInAdmin = null;
+
+        // 1. Authorized HR Emails (Only these emails can register an admin account)
+        const APPROVED_HR_EMAILS = {
+            'john.rey@gweens.com': { name: 'John Rey Baria', role: 'HR Team Leader' },
+            'admin@gweens.com': { name: 'System Admin', role: 'Administrator' },
+            'recruitment@gweens.com': { name: 'Recruitment Staff', role: 'Talent Acquisition' }
+        };
+
+        // 2. Simulated Database of Registered Admin Users (Pre-loaded Main Admin)
+        let MOCK_ADMIN_ACCOUNTS = {
+            'john.rey@gweens.com': { 
+                passwordHash: btoa('Admin@123!'), 
+                pwdHistory: [btoa('Admin@123!')] 
+            }
+        };
+
+        // 3. Security Lockout tracking (Failed Attempts per email)
+        let ADMIN_LOGIN_ATTEMPTS = {};
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            // Ensure app layout is hidden and auth layout is shown initially
+            document.getElementById('app-layout').classList.add('hidden');
+            document.getElementById('auth-layout').classList.remove('hidden');
+        });
+
+        // --- AUTH VIEWS ---
+        function switchAuthView(viewId) {
+            if(viewId === 'login') {
+                document.getElementById('admin-login-view').classList.remove('hidden');
+                document.getElementById('admin-register-view').classList.add('hidden');
+            } else {
+                document.getElementById('admin-login-view').classList.add('hidden');
+                document.getElementById('admin-register-view').classList.remove('hidden');
+            }
+        }
+
+        // --- AUTHENTICATION LOGIC ---
+        function handleAdminRegister(e) {
+            e.preventDefault();
+            const errorBox = document.getElementById('admin-register-error');
+            errorBox.classList.add('hidden');
+            
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const confirm = document.getElementById('reg-confirm').value;
+
+            // 1. Check if email is an Approved HR Email
+            if (!APPROVED_HR_EMAILS[email]) {
+                errorBox.innerText = "Error: Unauthorized. Only approved HR personnel can create an admin account.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            // 2. Check if account already exists
+            if (MOCK_ADMIN_ACCOUNTS[email]) {
+                errorBox.innerText = "An admin account already exists for this email. Please login.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            // 3. Validate Password matching
+            if (password !== confirm) {
+                errorBox.innerText = "Passwords do not match.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            // 4. Validate Password Complexity (Regex)
+            // Minimum 8 chars, at least 1 uppercase, 1 number, 1 special character
+            const complexityRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (!complexityRegex.test(password)) {
+                errorBox.innerText = "Password must be 8+ characters and include an uppercase letter, a number, and a special character.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            // 5. Create Account (Simulated Encryption via Base64)
+            const simulatedHash = btoa(password);
+            MOCK_ADMIN_ACCOUNTS[email] = {
+                passwordHash: simulatedHash,
+                pwdHistory: [simulatedHash]
+            };
+
+            // Show Success & Redirect
+            document.getElementById('admin-register-success').classList.remove('hidden');
+            document.getElementById('admin-register-form').reset();
+            
+            setTimeout(() => {
+                document.getElementById('admin-register-success').classList.add('hidden');
+                switchAuthView('login');
+            }, 2000);
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const errorBox = document.getElementById('admin-login-error');
+            errorBox.classList.add('hidden');
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const now = new Date().getTime();
+
+            // 1. Check Lockout Status
+            if (ADMIN_LOGIN_ATTEMPTS[email] && ADMIN_LOGIN_ATTEMPTS[email].lockoutUntil) {
+                if (now < ADMIN_LOGIN_ATTEMPTS[email].lockoutUntil) {
+                    const remainingMins = Math.ceil((ADMIN_LOGIN_ATTEMPTS[email].lockoutUntil - now) / 60000);
+                    errorBox.innerText = `Account locked due to 5 failed attempts. Try again in ${remainingMins} minute(s).`;
+                    errorBox.classList.remove('hidden');
+                    return;
+                } else {
+                    // Lockout period expired, reset
+                    ADMIN_LOGIN_ATTEMPTS[email] = { count: 0, lockoutUntil: null };
+                }
+            }
+
+            // 2. Authenticate
+            const userAccount = MOCK_ADMIN_ACCOUNTS[email];
+            const simulatedAttemptHash = btoa(password);
+
+            if (userAccount && userAccount.passwordHash === simulatedAttemptHash) {
+                // Success!
+                if (ADMIN_LOGIN_ATTEMPTS[email]) ADMIN_LOGIN_ATTEMPTS[email] = { count: 0, lockoutUntil: null }; 
+                
+                // Set logged in user
+                loggedInAdmin = {
+                    email: email,
+                    name: APPROVED_HR_EMAILS[email].name,
+                    role: APPROVED_HR_EMAILS[email].role,
+                    initials: APPROVED_HR_EMAILS[email].name.split(' ').map(n => n[0]).join('').substring(0,2)
+                };
+                
+                // Update UI and Transition
+                document.getElementById('sidebar-name').innerText = loggedInAdmin.name;
+                document.getElementById('dash-greeting-name').innerText = loggedInAdmin.name.split(' ')[0];
+                document.getElementById('sidebar-role').innerText = loggedInAdmin.role;
+                document.getElementById('sidebar-initials').innerText = loggedInAdmin.initials;
+
+                document.getElementById('admin-login-form').reset();
+                document.getElementById('auth-layout').classList.add('hidden');
+                document.getElementById('app-layout').classList.remove('hidden');
+
+                // Load Dashboard Data
+                fetchAdminData();
+
+            } else {
+                // Failed Attempt Tracking
+                if (!ADMIN_LOGIN_ATTEMPTS[email]) ADMIN_LOGIN_ATTEMPTS[email] = { count: 0, lockoutUntil: null };
+                ADMIN_LOGIN_ATTEMPTS[email].count += 1;
+
+                if (ADMIN_LOGIN_ATTEMPTS[email].count >= 5) {
+                    // 5 minute lockout
+                    ADMIN_LOGIN_ATTEMPTS[email].lockoutUntil = now + (5 * 60 * 1000);
+                    errorBox.innerText = `Maximum attempts reached. Your account is locked for 5 minutes.`;
+                } else {
+                    const attemptsLeft = 5 - ADMIN_LOGIN_ATTEMPTS[email].count;
+                    errorBox.innerText = `Invalid email or password. You have ${attemptsLeft} attempt(s) remaining.`;
+                }
+                errorBox.classList.remove('hidden');
+            }
+        }
+
+        function adminLogout() {
+            loggedInAdmin = null;
+            // Clear App view, show Auth view
+            document.getElementById('app-layout').classList.add('hidden');
+            document.getElementById('auth-layout').classList.remove('hidden');
+            switchAuthView('login');
+        }
+
+        // --- API INTEGRATIONS (Admin Side) ---
+
+        function fetchAdminData() {
+            try {
+                Promise.all([
+                    fetch('admin_api.php?action=get_applicants').then(r => r.json()),
+                    fetch('admin_api.php?action=get_jobs').then(r => r.json()),
+                    fetch('admin_api.php?action=get_recognition').then(r => r.json())
+                ]).then(([appData, jobData, feedData]) => {
+                    if(appData.status === 'success') APPLICATIONS = appData.data;
+                    if(jobData.status === 'success') JOBS = jobData.data;
+                    if(feedData.status === 'success') RECOGNITION_FEED = feedData.data;
+                    refreshAllViews();
+                }).catch(error => fallbackToMockAdminData(error));
+            } catch (error) {
+                fallbackToMockAdminData(error);
+            }
+        }
+
+        function fallbackToMockAdminData(error) {
+            console.log('Using mock admin data (Preview Environment Fallback):', error.message || error);
+            
+            JOBS = [
+                { id: 1, title: 'Senior Barista', department: 'Beverage & Service', type: 'Full-time', status: 'Active' },
+                { id: 2, title: 'Pastry Chef / Baker', department: 'Kitchen', type: 'Full-time', status: 'Active' },
+                { id: 3, title: 'Store Cashier', department: 'Front of House', type: 'Part-time', status: 'Active' }
+            ];
+
+            APPLICATIONS = [
+                { id: 'APP-001', name: 'Maria Santos', job: 'Senior Barista', date: '2026-03-01', status: 'Screening', email: 'maria@example.com', phone: '0917-123-4567', cover: 'I have 3 years experience in a busy cafe setting...' },
+                { id: 'APP-002', name: 'Mark Repardas', job: 'Pastry Chef / Baker', date: '2026-02-28', status: 'Interview', email: 'mark.r@example.com', phone: '0918-987-6543', cover: 'Graduated top of my culinary class...' },
+                { id: 'APP-003', name: 'Erica Ylagan', job: 'Store Cashier', date: '2026-02-28', status: 'Hired', email: 'erica.y@example.com', phone: '0919-555-1234', cover: 'Excellent customer service skills...',
+                  onboarding: [
+                      { task: 'Signed Employment Contract', completed: true },
+                      { task: 'Received Staff Uniform', completed: true },
+                      { task: 'Health & Safety Orientation', completed: false },
+                      { task: 'POS System Training', completed: false }
+                  ],
+                  performance: {
+                      day30: 'Completed', day60: 'Pending', day90: 'Pending', score: 85,
+                      skills: [
+                          { name: 'POS Operations', passed: true },
+                          { name: 'Customer Greeting Standard', passed: true },
+                          { name: 'End of Day Tills', passed: false }
+                      ]
+                  }
+                },
+                { id: 'APP-004', name: 'John Paul', job: 'Senior Barista', date: '2026-02-27', status: 'Screening', email: 'jp@example.com', phone: '0920-111-2222', cover: 'Passionate about latte art and single origin beans.' },
+                { id: 'APP-005', name: 'Patricia Mabuti', job: 'Store Cashier', date: '2026-02-25', status: 'Rejected', email: 'patricia@example.com', phone: '0921-333-4444', cover: 'Looking for a part-time job.' },
+                { id: 'APP-006', name: 'James De Leon', job: 'Pastry Chef / Baker', date: '2026-02-20', status: 'Hired', email: 'james.d@example.com', phone: '0922-444-5555', cover: 'Love creating seasonal pastries.',
+                  onboarding: [
+                      { task: 'Signed Employment Contract', completed: true },
+                      { task: 'Received Staff Uniform', completed: true },
+                      { task: 'Health & Safety Orientation', completed: true },
+                      { task: 'Kitchen Equipment Training', completed: true }
+                  ],
+                  performance: {
+                      day30: 'Completed', day60: 'Completed', day90: 'Pending', score: 92,
+                      skills: [
+                          { name: 'Pastry Baking Consistency', passed: true },
+                          { name: 'Oven Maintenance', passed: true },
+                          { name: 'Recipe Scaling', passed: true }
+                      ]
+                  }
+                }
+            ];
+
+            RECOGNITION_FEED = [
+                { id: 1, type: 'welcome', author: 'HR Team', target_name: 'Erica Ylagan', role: 'Store Cashier', time: '2 hours ago', message: 'Welcome to the Gween\'s Bake n Brew family! We are excited to see you shine at the front counter.', icon: 'hand-metal' },
+                { id: 2, type: 'kudos', author: 'John Rey', target_name: 'James De Leon', badge: 'Fast Learner', time: '1 day ago', message: 'James mastered the new oven settings on his first try! Amazing work.', icon: 'zap' },
+                { id: 3, type: 'welcome', author: 'HR Team', target_name: 'James De Leon', role: 'Pastry Chef', time: '1 week ago', message: 'Let\'s all give a warm welcome to James, our newest Pastry Chef!', icon: 'party-popper' },
+                { id: 4, type: 'kudos', author: 'Patricia', target_name: 'Erica Ylagan', badge: 'Team Player', time: '3 hours ago', message: 'Thanks for helping me cover the rush hour shift today!', icon: 'users' }
+            ];
+
+            refreshAllViews();
+        }
+
+        // --- APP NAVIGATION ---
+        function switchAdminView(viewId) {
+            document.querySelectorAll('.admin-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-[#fdf8f5]', 'text-[#5c4033]');
+                btn.classList.add('text-gray-500');
+            });
+
+            document.getElementById(`${viewId}-view`).classList.add('active');
+            
+            const activeBtn = document.getElementById(`nav-${viewId}`);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-gray-500');
+                activeBtn.classList.add('bg-[#fdf8f5]', 'text-[#5c4033]');
+            }
+
+            if(viewId === 'dashboard') renderDashboard();
+            if(viewId === 'directory') renderDirectory();
+            if(viewId === 'onboarding') renderOnboarding();
+            if(viewId === 'performance') renderPerformance();
+            if(viewId === 'recognition') renderRecognition();
+            if(viewId === 'pipeline') renderKanban();
+            if(viewId === 'jobs') renderJobs();
+        }
+
+        function refreshAllViews() {
+            renderDashboard();
+            renderKanban();
+            renderJobs();
+            renderDirectory();
+            renderOnboarding();
+            renderPerformance();
+            renderRecognition();
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Screening': return 'bg-blue-100 text-blue-700';
+                case 'Interview': return 'bg-amber-100 text-amber-700';
+                case 'Hired': return 'bg-green-100 text-green-700';
+                case 'Rejected': return 'bg-red-100 text-red-700';
+                default: return 'bg-gray-100 text-gray-700';
+            }
+        }
+
+        function renderDashboard() {
+            document.getElementById('stat-total').innerText = APPLICATIONS.length;
+            document.getElementById('stat-review').innerText = APPLICATIONS.filter(a => a.status === 'Screening').length;
+            document.getElementById('stat-hired').innerText = APPLICATIONS.filter(a => a.status === 'Hired').length;
+
+            const tbody = document.getElementById('recent-applications-table');
+            if(APPLICATIONS.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">No applications found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = APPLICATIONS.slice(0, 5).map(app => `
+                <tr class="hover:bg-[#fdf8f5]/50 transition-colors">
+                    <td class="px-6 py-4 font-bold text-[#4a332a]">${app.name}</td>
+                    <td class="px-6 py-4 text-gray-600">${app.job}</td>
+                    <td class="px-6 py-4 text-gray-500">${app.date}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(app.status)}">
+                            ${app.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <button onclick="openModal('${app.id}')" class="text-[#8b6b5d] hover:text-[#5c4033] font-medium bg-white border border-[#e8dcd5] px-3 py-1.5 rounded-lg shadow-sm">Review</button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderKanban() {
+            const columns = ['Screening', 'Interview', 'Hired', 'Rejected'];
+            
+            columns.forEach(col => {
+                const colData = APPLICATIONS.filter(a => a.status === col);
+                document.getElementById(`count-${col}`).innerText = colData.length;
+                
+                const colContainer = document.getElementById(`col-${col}`);
+                colContainer.innerHTML = colData.map(app => `
+                    <div class="kanban-card bg-white p-4 rounded-xl border border-[#e8dcd5] shadow-sm cursor-grab active:cursor-grabbing hover:border-[#cda896] transition-colors" 
+                         draggable="true" 
+                         ondragstart="dragStart(event, '${app.id}')"
+                         ondragend="dragEnd(event)"
+                         onclick="openModal('${app.id}')">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-[#4a332a] leading-tight">${app.name}</h4>
+                            <span class="text-[10px] text-gray-400 font-medium">${app.id}</span>
+                        </div>
+                        <p class="text-xs font-medium text-[#8b6b5d] bg-[#fdf8f5] inline-block px-2 py-1 rounded mb-3">${app.job}</p>
+                        <div class="flex justify-between items-center text-xs text-gray-400 pt-2 border-t border-gray-100 mt-2">
+                            <span>Applied: ${app.date}</span>
+                            <div class="w-6 h-6 bg-[#f3f0ea] rounded-full flex items-center justify-center border border-[#e8dcd5] text-[#5c4033]">
+                                <i data-lucide="file-text" class="w-3 h-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            });
+            lucide.createIcons();
+        }
+
+        function renderJobs() {
+            const container = document.getElementById('admin-jobs-list');
+            container.innerHTML = JOBS.map(job => `
+                <div class="bg-white border border-[#e8dcd5] rounded-xl p-5 flex items-center justify-between shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-[#fdf8f5] text-[#8b6b5d] rounded-xl flex items-center justify-center">
+                            <i data-lucide="briefcase" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg text-[#4a332a]">${job.title}</h4>
+                            <p class="text-sm text-gray-500">${job.department} • ${job.type}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full border border-green-200">${job.status}</span>
+                        <div class="flex gap-2">
+                            <button class="p-2 text-gray-400 hover:text-[#5c4033] bg-gray-50 rounded-lg border border-gray-200"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                            <button class="p-2 text-gray-400 hover:text-red-500 bg-gray-50 rounded-lg border border-gray-200"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderDirectory() {
+            const tbody = document.getElementById('directory-table');
+            tbody.innerHTML = APPLICATIONS.map(app => `
+                <tr class="hover:bg-[#fdf8f5]/50 transition-colors">
+                    <td class="px-6 py-4 text-gray-400 font-medium">${app.id}</td>
+                    <td class="px-6 py-4 font-bold text-[#4a332a]">${app.name}</td>
+                    <td class="px-6 py-4 text-gray-600">
+                        <span class="bg-[#fdf8f5] text-[#8b6b5d] px-2 py-1 rounded text-xs font-medium border border-[#f0e4dd]">${app.job}</span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">
+                        <div class="flex flex-col gap-1">
+                            <span class="flex items-center gap-1.5"><i data-lucide="mail" class="w-3 h-3 text-[#8b6b5d]"></i> ${app.email}</span>
+                            <span class="flex items-center gap-1.5"><i data-lucide="phone" class="w-3 h-3 text-[#8b6b5d]"></i> ${app.phone}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(app.status)}">
+                            ${app.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="openModal('${app.id}')" class="text-[#8b6b5d] hover:text-[#5c4033] font-medium bg-white border border-[#e8dcd5] px-3 py-1.5 rounded-lg shadow-sm transition-colors">View Profile</button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderOnboarding() {
+            const container = document.getElementById('onboarding-list');
+            const hiredApps = APPLICATIONS.filter(a => a.status === 'Hired' && a.onboarding);
+            
+            if (hiredApps.length === 0) {
+                container.innerHTML = `<div class="text-center py-12 bg-white rounded-2xl border border-[#e8dcd5] text-gray-500 font-medium">No active onboarding tasks. Hire a candidate to start!</div>`;
+                return;
+            }
+
+            container.innerHTML = hiredApps.map(app => {
+                const total = app.onboarding.length;
+                const completed = app.onboarding.filter(t => t.completed).length;
+                const progress = Math.round((completed / total) * 100) || 0;
+                
+                return `
+                <div class="bg-white border border-[#e8dcd5] rounded-2xl shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-[#e8dcd5] flex flex-col md:flex-row justify-between md:items-center bg-[#fdf8f5]/50 gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[#5c4033] text-white flex items-center justify-center font-bold text-xl shadow-sm">
+                                ${app.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg text-[#4a332a]">${app.name}</h4>
+                                <p class="text-sm text-[#8b6b5d] font-medium">${app.job}</p>
+                            </div>
+                        </div>
+                        <div class="md:text-right">
+                            <span class="text-sm font-bold text-[#4a332a] flex items-center md:justify-end gap-2">
+                                ${progress === 100 ? '<i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i>' : ''} 
+                                ${progress}% Completed
+                            </span>
+                            <div class="w-full md:w-48 h-2.5 bg-gray-200 rounded-full mt-2 overflow-hidden">
+                                <div class="h-full ${progress === 100 ? 'bg-green-500' : 'bg-[#8b6b5d]'} transition-all duration-500" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-3 bg-white">
+                        ${app.onboarding.map((task, index) => `
+                            <label class="flex items-center gap-3 p-3.5 rounded-xl border ${task.completed ? 'border-green-200 bg-green-50/50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'} cursor-pointer transition-colors">
+                                <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleOnboardingTask('${app.id}', ${index})" class="w-5 h-5 text-[#5c4033] rounded border-gray-300 focus:ring-[#5c4033]">
+                                <span class="text-sm font-medium ${task.completed ? 'text-green-800 line-through opacity-70' : 'text-gray-700'}">${task.task}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function renderPerformance() {
+            const container = document.getElementById('performance-list');
+            const hiredApps = APPLICATIONS.filter(a => a.status === 'Hired' && a.performance);
+
+            if (hiredApps.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 bg-white rounded-2xl border border-[#e8dcd5] text-gray-500 font-medium">No active probationary employees.</div>`;
+                return;
+            }
+
+            container.innerHTML = hiredApps.map(app => {
+                const perf = app.performance;
+                const getMilestoneBadge = (status, label) => {
+                    if (status === 'Completed') return `<span class="px-2.5 py-1 text-xs font-bold rounded-lg border bg-green-50 border-green-200 text-green-700">${label}: Done</span>`;
+                    return `<span class="px-2.5 py-1 text-xs font-bold rounded-lg border bg-amber-50 border-amber-200 text-amber-700">${label}: Pending</span>`;
+                };
+
+                return `
+                <div class="bg-white border border-[#e8dcd5] rounded-2xl shadow-sm p-6 flex flex-col">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-[#fdf8f5] text-[#5c4033] flex items-center justify-center font-bold text-xl border border-[#f0e4dd]">
+                                ${app.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg text-[#4a332a]">${app.name}</h4>
+                                <p class="text-sm text-[#8b6b5d] font-medium">${app.job}</p>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-black text-[#5c4033] leading-none">${perf.score}</div>
+                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Avg Score</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h5 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Review Milestones</h5>
+                        <div class="flex gap-2">
+                            ${getMilestoneBadge(perf.day30, '30 Day')}
+                            ${getMilestoneBadge(perf.day60, '60 Day')}
+                            ${getMilestoneBadge(perf.day90, '90 Day')}
+                        </div>
+                    </div>
+
+                    <div class="flex-1">
+                        <h5 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Role Skills Checklist</h5>
+                        <ul class="space-y-2">
+                            ${perf.skills.map(skill => `
+                                <li class="flex items-center gap-2 text-sm">
+                                    ${skill.passed 
+                                        ? '<i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i>' 
+                                        : '<i data-lucide="circle" class="w-4 h-4 text-gray-300"></i>'}
+                                    <span class="${skill.passed ? 'text-gray-700' : 'text-gray-500'}">${skill.name}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <button onclick="openEvaluationModal('${app.id}')" class="mt-6 w-full py-2.5 bg-[#fdf8f5] text-[#5c4033] font-bold rounded-xl hover:bg-[#f5e6de] border border-[#f0e4dd] transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="edit" class="w-4 h-4"></i> Log Evaluation
+                    </button>
+                </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function renderRecognition() {
+            const wallContainer = document.getElementById('welcome-wall-feed');
+            const kudosContainer = document.getElementById('kudos-feed');
+
+            const welcomePosts = RECOGNITION_FEED.filter(post => post.type === 'welcome');
+            const kudosPosts = RECOGNITION_FEED.filter(post => post.type === 'kudos');
+
+            wallContainer.innerHTML = welcomePosts.length > 0 ? welcomePosts.map(post => `
+                <div class="bg-white border border-[#e8dcd5] rounded-2xl p-5 shadow-sm flex gap-4">
+                    <div class="w-12 h-12 bg-[#fdf8f5] text-[#8b6b5d] rounded-full flex items-center justify-center shrink-0 border border-[#f0e4dd]">
+                        <i data-lucide="${post.icon}" class="w-6 h-6"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-[#4a332a]"><span class="text-[#8b6b5d]">Welcome,</span> ${post.target_name || post.target}!</h4>
+                            <span class="text-xs text-gray-400 font-medium">${post.time || new Date(post.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <p class="text-xs text-[#8b6b5d] font-medium bg-[#fdf8f5] inline-block px-2 py-0.5 rounded mb-2">${post.role}</p>
+                        <p class="text-sm text-gray-600 leading-relaxed">${post.message}</p>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-4 text-xs font-medium text-gray-400">
+                            <button class="hover:text-[#5c4033] flex items-center gap-1.5 transition-colors"><i data-lucide="heart" class="w-4 h-4"></i> Like</button>
+                            <button class="hover:text-[#5c4033] flex items-center gap-1.5 transition-colors"><i data-lucide="message-circle" class="w-4 h-4"></i> Comment</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : '<p class="text-sm text-gray-500">No welcome posts yet.</p>';
+
+            kudosContainer.innerHTML = kudosPosts.length > 0 ? kudosPosts.map(post => `
+                <div class="bg-gradient-to-br from-white to-[#fdf8f5] border border-[#e8dcd5] rounded-2xl p-4 shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-amber-100 opacity-50">
+                        <i data-lucide="award" class="w-24 h-24"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="bg-amber-100 text-amber-700 p-1.5 rounded-lg">
+                                <i data-lucide="${post.icon}" class="w-4 h-4"></i>
+                            </div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-amber-700">${post.badge}</span>
+                        </div>
+                        <h4 class="font-bold text-[#4a332a] text-sm mb-1">${post.target_name || post.target}</h4>
+                        <p class="text-xs text-gray-600 mb-3">"${post.message}"</p>
+                        <p class="text-[10px] text-gray-400 font-medium">From: ${post.author_name || post.author} • ${post.time || new Date(post.created_at).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `).join('') : '<p class="text-sm text-gray-500">No kudos given yet.</p>';
+
+            lucide.createIcons();
+        }
+
+        // --- INTERACTION LOGIC ---
+
+        function toggleOnboardingTask(appId, taskIndex) {
+            const app = APPLICATIONS.find(a => a.id == appId);
+            if(app && app.onboarding) {
+                // Toggle true/false
+                const isCompleted = !app.onboarding[taskIndex].completed;
+                app.onboarding[taskIndex].completed = isCompleted;
+                
+                // Real backend API Call
+                try {
+                    fetch('admin_api.php', {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'update_onboarding_task', task_id: app.onboarding[taskIndex].id, is_completed: isCompleted })
+                    }).catch(e => console.log('Mocking update_onboarding_task (Fallback):', e));
+                } catch(e) {
+                    console.log('Mocking update_onboarding_task (Fallback):', e);
+                }
+               
+                renderOnboarding(); // Re-render visually
+            }
+        }
+
+        // --- DRAG AND DROP KANBAN LOGIC ---
+        let draggedAppId = null;
+
+        function dragStart(event, appId) {
+            draggedAppId = appId;
+            event.target.classList.add('dragging');
+            event.dataTransfer.effectAllowed = 'move';
+        }
+
+        function dragEnd(event) {
+            event.target.classList.remove('dragging');
+            document.querySelectorAll('.kanban-col').forEach(col => col.classList.remove('drag-over'));
+        }
+
+        function allowDrop(event) {
+            event.preventDefault(); 
+            event.dataTransfer.dropEffect = 'move';
+            
+            const targetCol = event.target.closest('.kanban-col');
+            if(targetCol) {
+                document.querySelectorAll('.kanban-col').forEach(col => col.classList.remove('drag-over'));
+                targetCol.classList.add('drag-over');
+            }
+        }
+
+        function drop(event, newStatus) {
+            event.preventDefault();
+            document.querySelectorAll('.kanban-col').forEach(col => col.classList.remove('drag-over'));
+            
+            if (draggedAppId) {
+                const appIndex = APPLICATIONS.findIndex(a => a.id == draggedAppId);
+                if (appIndex !== -1 && APPLICATIONS[appIndex].status !== newStatus) {
+                    
+                    // Update local state for immediate UI feedback
+                    APPLICATIONS[appIndex].status = newStatus;
+
+                    // Automatically assign an onboarding checklist & performance data if moved to "Hired"
+                    if (newStatus === 'Hired') {
+                        if (!APPLICATIONS[appIndex].onboarding) {
+                            APPLICATIONS[appIndex].onboarding = [
+                                { task: 'Signed Employment Contract', completed: false },
+                                { task: 'Received Staff Uniform', completed: false },
+                                { task: 'Health & Safety Orientation', completed: false },
+                                { task: 'Role Specific Training', completed: false }
+                            ];
+                        }
+                        if (!APPLICATIONS[appIndex].performance) {
+                            APPLICATIONS[appIndex].performance = {
+                                day30: 'Pending', day60: 'Pending', day90: 'Pending', score: 0,
+                                skills: [
+                                    { name: 'Initial Workflow Grasp', passed: false },
+                                    { name: 'Team Communication', passed: false },
+                                    { name: 'Customer Service Standard', passed: false }
+                                ]
+                            };
+                        }
+
+                        // Generate a welcome post mock logic
+                    const exists = RECOGNITION_FEED.find(post => post.target_name === APPLICATIONS[appIndex].name && post.type === 'welcome');
+                        if(!exists) {
+                            RECOGNITION_FEED.unshift({
+                                id: Date.now(),
+                                type: 'welcome',
+                                author: 'System',
+                            target_name: APPLICATIONS[appIndex].name,
+                                role: APPLICATIONS[appIndex].job,
+                                time: 'Just now',
+                                message: `Let's all give a warm welcome to ${APPLICATIONS[appIndex].name}, our newest ${APPLICATIONS[appIndex].job}!`,
+                                icon: 'party-popper'
+                            });
+                        }
+                    }
+
+                    // Re-render UI
+                    refreshAllViews();
+
+                    // Real backend API Call
+                    try {
+                        fetch('admin_api.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'update_status', id: draggedAppId, status: newStatus })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if(data.status !== 'success') {
+                                console.error('Error updating status on server:', data.message);
+                            }
+                        })
+                        .catch(e => console.log('Mocking status update (Fallback):', e));
+                    } catch(e) {
+                        console.log('Mocking status update (Fallback):', e);
+                    }
+                }
+            }
+        }
+
+        // --- MODAL LOGIC ---
+        function openModal(appId) {
+            const app = APPLICATIONS.find(a => a.id == appId);
+            if(!app) return;
+
+            document.getElementById('modal-name').innerText = app.name;
+            document.getElementById('modal-job').innerText = `Applying for: ${app.job}`;
+            document.getElementById('modal-email').innerText = app.email;
+            document.getElementById('modal-phone').innerText = app.phone;
+            document.getElementById('modal-cover').innerText = `"${app.cover}"`;
+            
+            // Resume Button Logic
+            const resumeBtn = document.getElementById('modal-resume-btn');
+            if (app.resume_path) {
+                resumeBtn.onclick = () => window.open(app.resume_path, '_blank');
+                resumeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                resumeBtn.onclick = null;
+                resumeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+
+            document.getElementById('applicant-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('applicant-modal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('applicant-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // --- CREATE JOB MODAL LOGIC ---
+        function openCreateJobModal() {
+            document.getElementById('create-job-modal').classList.remove('hidden');
+        }
+
+        function closeCreateJobModal() {
+            document.getElementById('create-job-modal').classList.add('hidden');
+        }
+
+        function handleCreateJob(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const jobData = Object.fromEntries(formData.entries());
+            jobData.action = 'create_job';
+
+            fetch('admin_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(jobData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    closeCreateJobModal();
+                    e.target.reset();
+                    fetchAdminData(); // Refresh list
+                    switchAdminView('jobs');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        // --- EVALUATION MODAL LOGIC ---
+        function openEvaluationModal(appId) {
+            const app = APPLICATIONS.find(a => a.id == appId);
+            if(!app || !app.performance) return;
+
+            document.getElementById('eval-app-id').value = appId;
+            document.getElementById('eval-score').value = app.performance.score;
+            
+            const skillsContainer = document.getElementById('eval-skills-container');
+            skillsContainer.innerHTML = app.performance.skills.map((skill, idx) => `
+                <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" name="skill_${idx}" value="${skill.name}" ${skill.passed ? 'checked' : ''} class="w-4 h-4 text-[#5c4033] rounded border-gray-300 focus:ring-[#5c4033]">
+                    <span class="text-sm text-gray-700">${skill.name}</span>
+                </label>
+            `).join('');
+
+            document.getElementById('evaluation-modal').classList.remove('hidden');
+        }
+
+        function closeEvaluationModal() {
+            document.getElementById('evaluation-modal').classList.add('hidden');
+        }
+
+        function handleEvaluationSubmit(e) {
+            e.preventDefault();
+            const appId = document.getElementById('eval-app-id').value;
+            const score = document.getElementById('eval-score').value;
+            
+            // Gather skills from checkboxes
+            const skillsContainer = document.getElementById('eval-skills-container');
+            const checkboxes = skillsContainer.querySelectorAll('input[type="checkbox"]');
+            const skills = Array.from(checkboxes).map(cb => ({
+                name: cb.value,
+                passed: cb.checked
+            }));
+
+            fetch('admin_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update_performance',
+                    applicant_id: appId,
+                    score: score,
+                    skills: skills
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    closeEvaluationModal();
+                    fetchAdminData(); // Refresh UI
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        // --- KUDOS MODAL LOGIC ---
+        function openKudosModal() {
+            const select = document.getElementById('kudos-target');
+            const hired = APPLICATIONS.filter(a => a.status === 'Hired');
+            select.innerHTML = hired.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+            document.getElementById('kudos-modal').classList.remove('hidden');
+        }
+
+        function closeKudosModal() {
+            document.getElementById('kudos-modal').classList.add('hidden');
+        }
+
+        function handleKudosSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Map badge to icon
+            const icons = { 'Star Player': 'star', 'Fast Learner': 'zap', 'Team Player': 'users', 'Customer Favorite': 'heart' };
+            data.icon = icons[data.badge] || 'award';
+            data.action = 'add_kudos';
+            data.author = loggedInAdmin ? loggedInAdmin.name : 'HR Admin';
+
+            fetch('admin_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(resp => {
+                if(resp.status === 'success') {
+                    closeKudosModal();
+                    e.target.reset();
+                    fetchAdminData();
+                } else {
+                    alert('Error: ' + resp.message);
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>

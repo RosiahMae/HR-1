@@ -1,0 +1,97 @@
+# How to Run HR System with XAMPP
+
+## Prerequisites
+- XAMPP installed (Apache, MySQL, PHP)
+- Web browser (Chrome, Firefox, Edge)
+- Files in `c:\xammp\htdocs\cafe\php version\
+
+## Setup Steps
+
+### 1. Start XAMPP
+- Open XAMPP Control Panel
+- Click **Start** for Apache
+- Click **Start** for MySQL
+
+
+### 2. Verify Installation
+- Open browser: `http://localhost/phpmyadmin`
+- Should see phpMyAdmin dashboard (confirms MySQL is running)
+
+### 3. Access the System
+
+**Employee/Careers Portal:**
+```
+http://localhost/cafe/php%20version/index.php
+```
+pag ayaw use html instead.
+
+**HR Admin Portal:**
+```
+http://localhost/cafe/php%20version/admin.php
+```
+pag ayaw use html instead.
+
+
+## Test Credentials
+
+### HR Admin Login
+- **Email:** john.rey@gweens.com
+- **Password:** Admin@123!
+- **Access:** Dashboard, Recruitment Pipeline, Job Management, Onboarding
+
+### Employee/Applicant
+- **Can:** View job listings, apply for positions, login with any email/password combo
+- **No predefined accounts** - Registration/login works with demo data
+
+## Features Available (Demo Mode)
+
+✅ View job listings
+✅ Submit applications
+✅ Admin login & dashboard
+✅ Mock data for testing
+✅ Session-based authentication
+
+## File Locations
+
+```
+d:\xammp\htdocs\cafe\
+├── php version\
+│   ├── admin.php          (HR Admin Portal)
+│   └── index.php          (Employee/Careers Portal)
+├── db.php                 (Database connection - can be configured)
+├── api.php                (API endpoints - can be built out)
+└── admin_api.php          (Admin API endpoints - can be built out)
+```
+
+## Database Setup (Optional - For Production)
+
+To connect to real database, edit files and add connection:
+
+```php
+$host = 'localhost';
+$user = 'root';
+$password = '';
+$database = 'cafe_hr';
+
+$conn = new mysqli($host, $user, $password, $database);
+```
+
+Create database in phpMyAdmin:
+1. Open `http://localhost/phpmyadmin`
+2. Click "New Database"
+3. Name: `cafe_hr`
+4. Create tables (users, jobs, applications, onboarding)
+
+or just upload/copy paste the sql
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| 404 Not Found | Check file path and ensure Apache is running |
+| Cannot connect | Verify MySQL is running in XAMPP Control Panel |
+| CSS/JS not loading | Check browser console (F12) for path errors |
+| Login fails | Use test credentials: john.rey@gweens.com / Admin@123! |
+
+## Next Steps
+

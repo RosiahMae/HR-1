@@ -1,0 +1,33 @@
+# HR System - Talent Acquisition & Workforce Entry
+
+## Core Modules
+
+### 1. Applicant Management (Candidate Facing)
+- **Careers Page/Job Board** - Public job listings for all positions
+- **Application Form** - Submit resume, contact info, cover letter
+- **Application Tracking** - View status: Under Review → Interview → Offer → Hired
+
+### 2. Recruitment Management (HR Admin Facing)
+- **Job Posting Manager** - Create, edit, close positions
+- **Kanban Pipeline** - Drag-drop applicants through stages: Screening → Interview → Hired → Rejected
+- **Interview Scheduling** - Schedule and manage interview notes
+
+### 3. New Hire Onboarding
+- **Digital Checklist** - Automated onboarding tasks for new employees
+- **Task Tracking** - Contract signing, uniform, training completion
+
+### 4. Performance Management
+- **30-60-90 Day Reviews** - Probationary period evaluations
+- **Skill Assessments** - Role-specific competency tracking
+
+### 5. Social Recognition
+- **Welcome Wall** - New hire introductions to team
+- **Kudos System** - Recognition badges and team morale
+
+## User Roles
+
+| Role | Permissions |
+|------|------------|
+| **Applicant** | View jobs, apply, track own status |
+| **HR Admin** | Manage jobs, review candidates, control pipeline, onboarding |
+

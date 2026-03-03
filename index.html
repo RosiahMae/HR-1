@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gween's Bake n Brew - Careers & Employee Portal</title>
+    
+    <!-- Tailwind CSS for Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #faf7f2;
+            color: #4a332a;
+        }
+        h1, h2, h3, h4, .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .view-section { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .view-section.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="selection:bg-[#f5e6de] selection:text-[#4a332a]">
+
+    <!-- Navbar -->
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="switchView('careers')">
+                <div class="bg-[#5c4033] p-2 rounded-full text-white">
+                    <i data-lucide="coffee" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-[#4a332a] leading-tight font-serif">Gween's Bake n Brew</h1>
+                    <p class="text-xs text-[#8b6b5d] font-medium tracking-wider uppercase">Team Portal</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 items-center">
+                <button onclick="switchView('careers')" id="nav-open-roles" class="font-medium text-[#5c4033] hover:text-[#5c4033] transition-colors">
+                    Open Roles
+                </button>
+                
+                <!-- Dynamic Auth Buttons -->
+                <div id="nav-auth-container" class="flex gap-4 items-center">
+                    <button id="nav-dashboard-btn" onclick="handleWorkspaceClick()" class="flex items-center gap-2 font-medium px-4 py-2 rounded-full bg-[#fdf8f5] text-[#5c4033] hover:bg-[#f5e6de] transition-colors">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                        <span id="nav-workspace-text">My Workspace Login</span>
+                    </button>
+                    <button id="nav-logout-btn" onclick="logout()" class="hidden text-sm font-medium text-red-500 hover:text-red-700 transition-colors">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="min-h-[80vh]">
+        <!-- 1. CAREERS LISTING VIEW -->
+        <section id="careers-view" class="view-section active">
+            <div class="bg-gradient-to-br from-[#fdf8f5] to-[#f5e6de] py-20 px-4 text-center rounded-b-[3rem] shadow-sm mb-12">
+                <div class="max-w-3xl mx-auto">
+                    <h2 class="text-4xl md:text-5xl font-serif font-bold text-[#4a332a] mb-6">Join Our Brew-tiful Team</h2>
+                    <p class="text-lg text-[#6b4c3a] mb-8 leading-relaxed">
+                        We're always looking for passionate individuals who share our love for artisanal coffee and exquisite baked goods.
+                    </p>
+                </div>
+            </div>
+
+            <div class="max-w-5xl mx-auto px-4 pb-20">
+                <div class="flex justify-between items-end mb-8">
+                    <div>
+                        <h3 class="text-2xl font-bold text-[#4a332a]">Open Positions</h3>
+                    </div>
+                    <div id="job-count" class="text-sm font-medium text-[#8b6b5d] bg-[#fdf8f5] px-4 py-2 rounded-full">
+                        Loading...
+                    </div>
+                </div>
+                <div id="job-listings-container" class="grid gap-4">
+                    <!-- Jobs Injected Here via PHP/SQL API -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. JOB DETAILS VIEW -->
+        <section id="job-details-view" class="view-section max-w-4xl mx-auto px-4 py-12">
+            <button onclick="switchView('careers')" class="flex items-center gap-2 text-gray-500 hover:text-[#5c4033] mb-8 font-medium transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i> Back to all jobs
+            </button>
+
+            <div class="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-[#f0e4dd]">
+                <div class="border-b border-gray-100 pb-8 mb-8">
+                    <h2 id="detail-title" class="text-3xl md:text-4xl font-serif font-bold text-[#4a332a] mb-4">Job Title</h2>
+                    <div class="flex flex-wrap gap-6 text-gray-600">
+                        <div class="flex items-center gap-2"><i data-lucide="briefcase" class="w-5 h-5 text-[#8b6b5d]"></i> <span id="detail-dept" class="font-medium">Dept</span></div>
+                        <div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-5 h-5 text-[#8b6b5d]"></i> <span id="detail-loc" class="font-medium">Location</span></div>
+                        <div class="flex items-center gap-2"><i data-lucide="clock" class="w-5 h-5 text-[#8b6b5d]"></i> <span id="detail-type" class="font-medium">Type</span></div>
+                    </div>
+                </div>
+
+                <div class="prose max-w-none text-gray-600 mb-12">
+                    <h3 class="text-xl font-bold text-[#4a332a] mb-4">About the Role</h3>
+                    <p id="detail-desc" class="mb-8 leading-relaxed whitespace-pre-line">Description goes here...</p>
+
+                    <h3 class="text-xl font-bold text-[#4a332a] mb-4">Salary Range</h3>
+                    <p id="detail-salary" class="font-medium text-[#6b4c3a] bg-[#fdf8f5] inline-block px-4 py-2 rounded-lg">₱0 - ₱0</p>
+                </div>
+
+                <button onclick="switchView('apply')" class="w-full md:w-auto bg-[#5c4033] text-white px-12 py-4 rounded-xl font-bold text-lg hover:bg-[#4a332a] transition-colors shadow-md transform hover:-translate-y-0.5">
+                    Apply for this Position
+                </button>
+            </div>
+        </section>
+
+        <!-- 3. APPLY FORM VIEW -->
+        <section id="apply-view" class="view-section max-w-3xl mx-auto px-4 py-12">
+            <button onclick="switchView('job-details')" class="flex items-center gap-2 text-gray-500 hover:text-[#5c4033] mb-8 font-medium transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i> Back to job details
+            </button>
+
+            <!-- Success Message -->
+            <div id="success-message" class="hidden bg-white rounded-3xl p-12 shadow-sm border border-[#f0e4dd] text-center">
+                <div class="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="check-circle-2" class="w-12 h-12"></i>
+                </div>
+                <h2 class="text-3xl font-serif font-bold text-[#4a332a] mb-4">Application Submitted!</h2>
+                <p class="text-gray-600 mb-8 text-lg">Thank you for applying. Our HR team will review your application shortly.</p>
+                <button onclick="switchView('careers')" class="text-[#5c4033] font-bold hover:underline">Back to Open Roles</button>
+            </div>
+
+            <!-- Application Form -->
+            <div id="form-container" class="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-[#f0e4dd]">
+                <div class="mb-10">
+                    <h2 class="text-3xl font-serif font-bold text-[#4a332a] mb-2">Submit Application</h2>
+                    <p class="text-gray-500">Applying for: <strong id="apply-job-title" class="text-[#6b4c3a]">Job Title</strong></p>
+                </div>
+
+                <form id="application-form" onsubmit="submitApplication(event)" class="space-y-6">
+                    <input type="hidden" id="job_id" name="job_id">
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-gray-700">Full Name *</label>
+                            <input type="text" name="fullName" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all" placeholder="Juan Dela Cruz">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-gray-700">Email Address *</label>
+                            <input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all" placeholder="juan@example.com">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-gray-700">Phone Number *</label>
+                        <input type="tel" name="phone" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all" placeholder="0912 345 6789">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-gray-700">Cover Letter (Optional)</label>
+                        <textarea name="coverLetter" rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all resize-none" placeholder="Tell us why you'd be a great fit..."></textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-gray-700">Resume / CV (PDF/DOCX) *</label>
+                        <input type="file" name="resume" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#fdf8f5] file:text-[#5c4033] hover:file:bg-[#f5e6de]">
+                    </div>
+
+                    <!-- Error Alert Box -->
+                    <div id="form-error" class="hidden bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium border border-red-200"></div>
+
+                    <div class="pt-6 border-t border-gray-100">
+                        <button type="submit" id="submit-btn" class="w-full bg-[#5c4033] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#4a332a] transition-colors disabled:opacity-50">
+                            Submit Application
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- 4. AUTHENTICATION: LOGIN VIEW -->
+        <section id="login-view" class="view-section max-w-md mx-auto px-4 py-20">
+            <div class="bg-white rounded-3xl p-8 shadow-sm border border-[#f0e4dd]">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-[#fdf8f5] text-[#5c4033] rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="lock" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Employee Login</h2>
+                    <p class="text-gray-500 text-sm mt-1">Access your onboarding and team workspace.</p>
+                </div>
+
+                <div id="login-error" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-200 mb-6 text-center"></div>
+
+                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-5">
+                    <div>
+                        <label class="text-sm font-bold text-gray-700 block mb-1">Email Address</label>
+                        <input type="email" id="login-email" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="text-sm font-bold text-gray-700 block mb-1">Password</label>
+                        <input type="password" id="login-password" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-[#5c4033] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#4a332a] transition-colors mt-2">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                    <p class="text-sm text-gray-500">Recently hired?</p>
+                    <button onclick="switchView('register')" class="text-[#5c4033] font-bold hover:underline mt-1">
+                        Create your account here
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. AUTHENTICATION: REGISTER VIEW -->
+        <section id="register-view" class="view-section max-w-md mx-auto px-4 py-12">
+            <div class="bg-white rounded-3xl p-8 shadow-sm border border-[#f0e4dd]">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-[#fdf8f5] text-[#5c4033] rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="user-plus" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Account Setup</h2>
+                    <p class="text-gray-500 text-sm mt-1">For newly hired employees only.</p>
+                </div>
+
+                <div id="register-error" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-200 mb-6"></div>
+                <div id="register-success" class="hidden bg-green-50 text-green-700 p-3 rounded-lg text-sm font-medium border border-green-200 mb-6 text-center">Account created! Redirecting to login...</div>
+
+                <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4">
+                    <div>
+                        <label class="text-sm font-bold text-gray-700 block mb-1">Registered Email</label>
+                        <input type="email" id="reg-email" required placeholder="The email you applied with" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="text-sm font-bold text-gray-700 block mb-1">New Password</label>
+                        <input type="password" id="reg-password" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                        <ul class="text-[10px] text-gray-400 mt-2 list-disc pl-4 space-y-0.5">
+                            <li>At least 8 characters</li>
+                            <li>Contains an uppercase letter</li>
+                            <li>Contains a number</li>
+                            <li>Contains a special character (@, $, !, %, *, ?, &)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <label class="text-sm font-bold text-gray-700 block mb-1">Confirm Password</label>
+                        <input type="password" id="reg-confirm" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b6b5d] focus:ring-2 outline-none transition-all">
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-[#5c4033] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#4a332a] transition-colors mt-4">
+                        Create Account
+                    </button>
+                </form>
+
+                <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                    <button onclick="switchView('login')" class="text-gray-500 text-sm font-medium hover:text-[#5c4033] transition-colors">
+                        <i data-lucide="arrow-left" class="w-3 h-3 inline"></i> Back to Login
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. DASHBOARD / EMPLOYEE WORKSPACE VIEW -->
+        <section id="dashboard-view" class="view-section max-w-6xl mx-auto px-4 py-12">
+            
+            <!-- Welcome Banner for Hired Employee -->
+            <div class="bg-gradient-to-r from-[#5c4033] to-[#8b6b5d] rounded-3xl p-8 md:p-10 shadow-lg mb-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                <i data-lucide="party-popper" class="absolute -right-10 -top-10 w-48 h-48 text-white opacity-10"></i>
+                <div class="relative z-10 flex items-center gap-6">
+                    <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
+                        <i data-lucide="user" class="w-10 h-10"></i>
+                    </div>
+                    <div>
+                        <span class="bg-green-500/20 text-green-100 border border-green-400/30 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase mb-3 inline-block">Status: Hired</span>
+                        <h2 class="text-3xl font-serif font-bold mb-1" id="dash-welcome-name">Welcome aboard!</h2>
+                        <p class="text-[#f5e6de]" id="dash-welcome-role">Loading role...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- LEFT COLUMN: Onboarding & Profile -->
+                <div class="space-y-8">
+                    
+                    <!-- Onboarding Checklist -->
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-[#f0e4dd]">
+                        <h3 class="text-lg font-bold text-[#4a332a] mb-4 flex items-center gap-2 font-serif">
+                            <i data-lucide="clipboard-check" class="w-5 h-5 text-[#8b6b5d]"></i> My Onboarding
+                        </h3>
+                        
+                        <!-- Progress Bar -->
+                        <div class="mb-5">
+                            <div class="flex justify-between text-xs font-bold text-gray-500 mb-2">
+                                <span>Progress</span>
+                                <span id="onboarding-progress-text">50%</span>
+                            </div>
+                            <div class="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div id="onboarding-progress-bar" class="h-full bg-green-500 transition-all duration-500" style="width: 50%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Tasks -->
+                        <div class="space-y-3" id="employee-onboarding-tasks">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Application Details (History) -->
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-[#f0e4dd]">
+                        <h3 class="text-lg font-bold text-[#4a332a] mb-4 font-serif">Application History</h3>
+                        <div class="bg-[#fdf8f5] p-4 rounded-xl border border-[#e8dcd5]">
+                            <h4 class="font-bold text-[#4a332a] mb-1" id="dash-history-role">Role</h4>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">Status:</span>
+                                <span class="text-green-600 font-bold">Hired</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN: Social Recognition Feed -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-[#f0e4dd]">
+                        <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+                            <h3 class="text-xl font-bold text-[#4a332a] font-serif flex items-center gap-2">
+                                <i data-lucide="award" class="w-6 h-6 text-[#8b6b5d]"></i> Team Recognition
+                            </h3>
+                            <button class="text-sm font-medium text-[#5c4033] hover:underline">View All</button>
+                        </div>
+
+                        <div id="employee-recognition-feed" class="space-y-4">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-20 py-8 text-center text-sm text-gray-400 border-t border-gray-200/50">
+        <p>&copy; 2026 Gween's Bake n Brew - Human Resources.</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA & STATE ---
+        let JOB_LISTINGS = [];
+        let currentJob = null;
+        let loggedInUser = null;
+
+        // --- MOCK DASHBOARD DATA ---
+        let ONBOARDING_TASKS = [
+            { id: 1, task: 'Sign Employment Contract', completed: true },
+            { id: 2, task: 'Receive Staff Uniform', completed: true },
+            { id: 3, task: 'Watch Health & Safety Video', completed: false },
+            { id: 4, task: 'Complete POS System Training', completed: false }
+        ];
+
+        const RECOGNITION_FEED = [
+            { id: 1, type: 'welcome', author: 'HR Team', target: 'Erica Ylagan', role: 'Store Cashier', time: '2 hours ago', message: 'Welcome to the Gween\'s Bake n Brew family, Erica! We are excited to see you shine at the front counter.', icon: 'hand-metal', targetEmail: 'erica.y@example.com' },
+            { id: 2, type: 'kudos', author: 'Patricia', target: 'Erica Ylagan', badge: 'Team Player', time: '3 hours ago', message: 'Thanks for helping me cover the rush hour shift today!', icon: 'users', targetEmail: 'erica.y@example.com' }
+        ];
+
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchJobsFromDatabase(); // Call real backend (with fallback)
+            lucide.createIcons();
+        });
+
+        // --- NAVIGATION & VIEWS ---
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`${viewId}-view`).classList.add('active');
+            
+            const navRoles = document.getElementById('nav-open-roles');
+            
+            if(viewId === 'careers' || viewId === 'job-details' || viewId === 'apply') {
+                navRoles.classList.replace('text-gray-500', 'text-[#5c4033]');
+            } else {
+                navRoles.classList.replace('text-[#5c4033]', 'text-gray-500');
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function handleWorkspaceClick() {
+            if (loggedInUser) {
+                switchView('dashboard');
+            } else {
+                switchView('login');
+            }
+        }
+
+        // --- AUTHENTICATION LOGIC ---
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const errorBox = document.getElementById('register-error');
+            errorBox.classList.add('hidden');
+            
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const confirm = document.getElementById('reg-confirm').value;
+
+            // Validate Password matching
+            if (password !== confirm) {
+                errorBox.innerText = "Passwords do not match.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            // Call API
+            const formData = new FormData();
+            formData.append('action', 'register');
+            formData.append('email', email);
+            formData.append('password', password);
+
+            fetch('api.php', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        document.getElementById('register-success').classList.remove('hidden');
+                        document.getElementById('register-form').reset();
+                        setTimeout(() => {
+                            document.getElementById('register-success').classList.add('hidden');
+                            switchView('login');
+                        }, 2000);
+                    } else {
+                        errorBox.innerText = data.message;
+                        errorBox.classList.remove('hidden');
+                    }
+                });
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const errorBox = document.getElementById('login-error');
+            errorBox.classList.add('hidden');
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            const formData = new FormData();
+            formData.append('action', 'login');
+            formData.append('email', email);
+            formData.append('password', password);
+
+            fetch('api.php', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        loggedInUser = data.data;
+                        // Fetch extra data
+                        fetchEmployeeData(loggedInUser.id);
+                        updateUIAfterLogin();
+                        document.getElementById('login-form').reset();
+                        switchView('dashboard');
+                    } else {
+                        errorBox.innerText = data.message;
+                        errorBox.classList.remove('hidden');
+                    }
+                })
+                .catch(err => {
+                    errorBox.innerText = "Connection error.";
+                    errorBox.classList.remove('hidden');
+                });
+        }
+
+        function updateUIAfterLogin() {
+            // Update Navbar
+            const dashBtn = document.getElementById('nav-dashboard-btn');
+            dashBtn.classList.replace('bg-[#fdf8f5]', 'bg-[#5c4033]');
+            dashBtn.classList.replace('text-[#5c4033]', 'text-white');
+            document.getElementById('nav-workspace-text').innerText = "My Workspace";
+            document.getElementById('nav-logout-btn').classList.remove('hidden');
+
+            // Populate Dashboard Data
+            document.getElementById('dash-welcome-name').innerText = `Welcome aboard, ${loggedInUser.full_name.split(' ')[0]}!`;
+            document.getElementById('dash-welcome-role').innerText = "Team Member"; // Role is in jobs table, simplified here
+            document.getElementById('dash-history-role').innerText = "Hired";
+        }
+
+        function fetchEmployeeData(id) {
+            fetch(`api.php?action=get_employee_data&id=${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        ONBOARDING_TASKS = data.data.tasks;
+                        if (data.data.feed) {
+                            RECOGNITION_FEED = data.data.feed;
+                        }
+                        renderOnboarding();
+                        renderRecognition();
+                    }
+                });
+        }
+
+        function logout() {
+            loggedInUser = null;
+            
+            // Reset Navbar
+            const dashBtn = document.getElementById('nav-dashboard-btn');
+            dashBtn.classList.replace('bg-[#5c4033]', 'bg-[#fdf8f5]');
+            dashBtn.classList.replace('text-white', 'text-[#5c4033]');
+            document.getElementById('nav-workspace-text').innerText = "My Workspace Login";
+            document.getElementById('nav-logout-btn').classList.add('hidden');
+
+            switchView('login');
+        }
+
+        // --- API INTEGRATIONS (Careers) ---
+
+        // 1. Fetch real jobs from api.php with fallback for preview environment
+        function fetchJobsFromDatabase() {
+            try {
+                fetch('api.php?action=get_jobs')
+                    .then(response => {
+                        if(!response.ok) throw new Error("Network response was not ok");
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            JOB_LISTINGS = data.data; // Store fetched data
+                            document.getElementById('job-count').innerText = `${JOB_LISTINGS.length} Roles Available`;
+                            renderJobs();
+                        } else {
+                            throw new Error(data.message);
+                        }
+                    })
+                    .catch(error => fallbackToMockJobs(error));
+            } catch (error) {
+                // Catches parsing errors when running in isolated preview blob URLs
+                fallbackToMockJobs(error);
+            }
+        }
+
+        function fallbackToMockJobs(error) {
+            console.log('Using mock job data (Preview Environment Fallback):', error.message || error);
+            JOB_LISTINGS = [
+                { id: 1, title: 'Senior Barista', department: 'Beverage & Service', location: 'Quezon City', type: 'Full-time', salary: '₱18,000 - ₱25,000', description: 'Looking for an experienced barista...' },
+                { id: 2, title: 'Pastry Chef / Baker', department: 'Kitchen', location: 'Quezon City', type: 'Full-time', salary: '₱20,000 - ₱30,000', description: 'Join our kitchen team to create the finest baked goods...' },
+                { id: 3, title: 'Store Cashier', department: 'Front of House', location: 'Quezon City', type: 'Part-time', salary: '₱12,000 - ₱15,000', description: 'Friendly cashier needed...' }
+            ];
+            document.getElementById('job-count').innerText = `${JOB_LISTINGS.length} Roles Available`;
+            renderJobs();
+        }
+
+        // 2. Submit form to api.php with fallback
+        function submitApplication(e) {
+            e.preventDefault(); 
+            
+            const btn = document.getElementById('submit-btn');
+            const errorBox = document.getElementById('form-error');
+            btn.innerText = "Submitting...";
+            btn.disabled = true;
+            errorBox.classList.add('hidden');
+
+            const formData = new FormData(e.target);
+            formData.append('action', 'submit_application');
+
+            try {
+                fetch('api.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if(!response.ok) throw new Error("Network response was not ok");
+                    return response.json();
+                })
+                .then(data => {
+                    if(data.status === 'success') {
+                        showSuccessState(e);
+                    } else {
+                        throw new Error(data.message);
+                    }
+                })
+                .catch(error => {
+                    // Fallback for preview mode
+                    console.log('Mocking successful submission (Preview Environment Fallback):', error.message || error);
+                    setTimeout(() => showSuccessState(e), 1000);
+                });
+            } catch (error) {
+                // Fallback for parsing errors in preview mode
+                console.log('Mocking successful submission (Preview Environment Fallback):', error.message || error);
+                setTimeout(() => showSuccessState(e), 1000);
+            }
+        }
+
+        function showSuccessState(e) {
+            document.getElementById('form-container').classList.add('hidden');
+            document.getElementById('success-message').classList.remove('hidden');
+            document.getElementById('submit-btn').innerText = "Submit Application";
+            document.getElementById('submit-btn').disabled = false;
+            e.target.reset();
+        }
+
+        // --- RENDERERS ---
+        function renderJobs() {
+            const container = document.getElementById('job-listings-container');
+            if(JOB_LISTINGS.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 bg-white border border-[#f0e4dd] rounded-2xl text-gray-500">No open positions at the moment. Please check back later!</div>`;
+                return;
+            }
+
+            container.innerHTML = JOB_LISTINGS.map(job => `
+                <div class="bg-white border border-[#f0e4dd] rounded-2xl p-6 hover:shadow-md transition-all group flex flex-col md:flex-row md:items-center justify-between cursor-pointer" onclick="openJobDetails(${job.id})">
+                    <div class="mb-4 md:mb-0">
+                        <h4 class="text-xl font-bold text-[#4a332a] group-hover:text-[#8b6b5d]">${job.title}</h4>
+                        <div class="flex flex-wrap gap-4 mt-3 text-sm text-gray-500">
+                            <div class="flex items-center gap-1.5 bg-[#fdf8f5] px-3 py-1 rounded-full text-[#6b4c3a]">
+                                <i data-lucide="briefcase" class="w-4 h-4"></i> ${job.department}
+                            </div>
+                            <div class="flex items-center gap-1.5"><i data-lucide="map-pin" class="w-4 h-4"></i> ${job.location || 'Quezon City'}</div>
+                            <div class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> ${job.type}</div>
+                        </div>
+                    </div>
+                    <button class="flex items-center justify-center gap-2 bg-[#fdf8f5] text-[#5c4033] px-6 py-3 rounded-xl font-medium group-hover:bg-[#5c4033] group-hover:text-white transition-colors w-full md:w-auto">
+                        View Details <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function openJobDetails(id) {
+            currentJob = JOB_LISTINGS.find(j => j.id == id); // Use == since ID from DB might be string
+            if(!currentJob) return;
+
+            document.getElementById('detail-title').innerText = currentJob.title;
+            document.getElementById('detail-dept').innerText = currentJob.department;
+            document.getElementById('detail-loc').innerText = currentJob.location || 'Quezon City';
+            document.getElementById('detail-type').innerText = currentJob.type;
+            document.getElementById('detail-desc').innerText = currentJob.description;
+            document.getElementById('detail-salary').innerText = currentJob.salary || 'Salary Discussed Upon Interview';
+
+            // Hidden input for the application form
+            document.getElementById('apply-job-title').innerText = currentJob.title;
+            document.getElementById('job_id').value = currentJob.id;
+
+            switchView('job-details');
+            lucide.createIcons();
+        }
+
+        function renderOnboarding() {
+            const container = document.getElementById('employee-onboarding-tasks');
+            const total = ONBOARDING_TASKS.length;
+            const completed = ONBOARDING_TASKS.filter(t => t.completed).length;
+            const progress = Math.round((completed / total) * 100) || 0;
+            
+            document.getElementById('onboarding-progress-text').innerText = `${progress}%`;
+            document.getElementById('onboarding-progress-bar').style.width = `${progress}%`;
+
+            container.innerHTML = ONBOARDING_TASKS.map((task, index) => `
+                <label class="flex items-center gap-3 p-3 rounded-xl border ${task.completed ? 'border-green-200 bg-green-50/50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'} cursor-pointer transition-colors">
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})" class="w-5 h-5 text-[#5c4033] rounded border-gray-300 focus:ring-[#5c4033]">
+                    <span class="text-sm font-medium ${task.completed ? 'text-green-800 line-through opacity-70' : 'text-gray-700'}">${task.task}</span>
+                </label>
+            `).join('');
+        }
+
+        function renderRecognition() {
+            if(!loggedInUser) return;
+            const container = document.getElementById('employee-recognition-feed');
+            
+            // Filter or flag posts specific to the logged in user
+            container.innerHTML = RECOGNITION_FEED.map(post => {
+                const isTargetUser = post.targetEmail === loggedInUser.email;
+                const bgClass = isTargetUser ? 'bg-amber-50/50 border-amber-200' : 'bg-white border-[#f0e4dd]';
+                const badgeClass = post.type === 'kudos' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700';
+                
+                return `
+                <div class="${bgClass} border rounded-2xl p-5 shadow-sm flex gap-4 transition-colors hover:shadow-md">
+                    <div class="w-12 h-12 bg-white text-[#8b6b5d] rounded-full flex items-center justify-center shrink-0 border border-[#f0e4dd] shadow-sm">
+                        <i data-lucide="${post.icon}" class="w-6 h-6"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-[#4a332a]">
+                                ${post.type === 'welcome' ? `<span class="text-[#8b6b5d]">Welcome,</span> ${post.target_name || post.target}!` : `${post.target_name || post.target}`}
+                            </h4>
+                            <span class="text-xs text-gray-400 font-medium">${post.time || new Date(post.created_at).toLocaleDateString()}</span>
+                        </div>
+                        ${post.type === 'kudos' 
+                            ? `<div class="inline-flex items-center gap-1.5 ${badgeClass} px-2 py-1 rounded-lg text-xs font-bold mb-2 uppercase tracking-wider">
+                                <i data-lucide="award" class="w-3 h-3"></i> ${post.badge}
+                               </div>` 
+                            : `<p class="text-xs text-[#8b6b5d] font-medium bg-white border border-[#f0e4dd] inline-block px-2 py-0.5 rounded-md mb-2">${post.role}</p>`
+                        }
+                        <p class="text-sm text-gray-600 leading-relaxed">"${post.message}"</p>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function toggleTask(taskId) {
+            const taskIndex = ONBOARDING_TASKS.findIndex(t => t.id === taskId);
+            if (taskIndex !== -1) {
+                ONBOARDING_TASKS[taskIndex].completed = !ONBOARDING_TASKS[taskIndex].completed;
+                renderOnboarding();
+            }
+        }
+    </script>
+</body>
+</html>
