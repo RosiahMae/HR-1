@@ -167,11 +167,15 @@
                 </button>
                 
                 <button onclick="switchAdminView('jobs')" id="nav-jobs" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-[#5c4033] hover:bg-[#fdf8f5] font-medium transition-colors">
-                    <i data-lucide="briefcase" class="w-5 h-5"></i> Job Postings
+                    <i data-lucide="briefcase" class="w-5 h-5"></i> Job Requisitions
                 </button>
 
                 <button onclick="switchAdminView('directory')" id="nav-directory" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-[#5c4033] hover:bg-[#fdf8f5] font-medium transition-colors">
                     <i data-lucide="users" class="w-5 h-5"></i> Applicant Directory
+                </button>
+
+                <button onclick="switchAdminView('employees')" id="nav-employees" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-[#5c4033] hover:bg-[#fdf8f5] font-medium transition-colors">
+                    <i data-lucide="user-check" class="w-5 h-5"></i> All Employees
                 </button>
 
                 <!-- Onboarding Module Button -->
@@ -235,36 +239,126 @@
                     <div class="mb-8">
                         <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Welcome back, <span id="dash-greeting-name">HR Team</span>!</h2>
                         <p class="text-gray-500">Here's what's happening in Talent Acquisition today.</p>
+                        <div id="sample-data-indicator" class="hidden mt-2 inline-flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium border border-amber-200">
+                            <i data-lucide="info" class="w-3 h-3"></i>
+                            Viewing Sample Data (Demo Mode)
+                        </div>
                     </div>
 
                     <!-- Stats Row -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <div class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4">
+                        <div onclick="switchAdminView('directory')" class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4 cursor-pointer hover:bg-[#fdf8f5] transition-colors">
                             <div class="bg-blue-50 text-blue-600 p-4 rounded-xl"><i data-lucide="users" class="w-6 h-6"></i></div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Total Applicants</p>
                                 <h3 class="text-2xl font-bold text-[#4a332a]" id="stat-total">...</h3>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4">
+                        <div onclick="switchAdminView('pipeline')" class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4 cursor-pointer hover:bg-[#fdf8f5] transition-colors">
                             <div class="bg-amber-50 text-amber-600 p-4 rounded-xl"><i data-lucide="clock" class="w-6 h-6"></i></div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Under Review</p>
                                 <h3 class="text-2xl font-bold text-[#4a332a]" id="stat-review">...</h3>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4">
-                            <div class="bg-purple-50 text-purple-600 p-4 rounded-xl"><i data-lucide="calendar" class="w-6 h-6"></i></div>
+                        <div onclick="switchAdminView('pipeline')" class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4 cursor-pointer hover:bg-[#fdf8f5] transition-colors">
+                            <div class="bg-purple-50 text-purple-600 p-4 rounded-xl"><i data-lucide="user-check" class="w-6 h-6"></i></div>
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Interviews Today</p>
-                                <h3 class="text-2xl font-bold text-[#4a332a]">2</h3>
+                                <p class="text-sm font-medium text-gray-500">Hired</p>
+                                <h3 class="text-2xl font-bold text-[#4a332a]" id="stat-hired">...</h3>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4">
-                            <div class="bg-green-50 text-green-600 p-4 rounded-xl"><i data-lucide="check-circle" class="w-6 h-6"></i></div>
+                        <div onclick="switchAdminView('pipeline')" class="bg-white p-6 rounded-2xl border border-[#e8dcd5] shadow-sm flex items-center gap-4 cursor-pointer hover:bg-[#fdf8f5] transition-colors">
+                            <div class="bg-red-50 text-red-600 p-4 rounded-xl"><i data-lucide="x-circle" class="w-6 h-6"></i></div>
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Hired This Month</p>
-                                <h3 class="text-2xl font-bold text-[#4a332a]" id="stat-hired">...</h3>
+                                <p class="text-sm font-medium text-gray-500">Rejected</p>
+                                <h3 class="text-2xl font-bold text-[#4a332a]" id="stat-rejected">...</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <div class="bg-white border border-[#e8dcd5] rounded-2xl shadow-sm p-6">
+                            <h3 class="text-lg font-bold font-serif text-[#4a332a] mb-4">Application Status Distribution</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-600">Screening</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-blue-500 h-2 rounded-full" style="width: 40%"></div>
+                                        </div>
+                                        <span class="text-sm font-bold text-[#4a332a]" id="chart-screening">0</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-600">Interview</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-amber-500 h-2 rounded-full" style="width: 20%"></div>
+                                        </div>
+                                        <span class="text-sm font-bold text-[#4a332a]" id="chart-interview">0</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-600">Training</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-purple-500 h-2 rounded-full" style="width: 15%"></div>
+                                        </div>
+                                        <span class="text-sm font-bold text-[#4a332a]" id="chart-training">0</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-600">Performance Check</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-orange-500 h-2 rounded-full" style="width: 10%"></div>
+                                        </div>
+                                        <span class="text-sm font-bold text-[#4a332a]" id="chart-performance">0</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-600">Hired</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-green-500 h-2 rounded-full" style="width: 10%"></div>
+                                        </div>
+                                        <span class="text-sm font-bold text-[#4a332a]" id="chart-hired">0</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-600">Rejected</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-red-500 h-2 rounded-full" style="width: 5%"></div>
+                                        </div>
+                                        <span class="text-sm font-bold text-[#4a332a]" id="chart-rejected">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-[#e8dcd5] rounded-2xl shadow-sm p-6">
+                            <h3 class="text-lg font-bold font-serif text-[#4a332a] mb-4">Hiring Funnel</h3>
+                            <div class="flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="text-4xl font-bold text-[#4a332a]" id="funnel-total">0</div>
+                                    <p class="text-sm text-gray-500">Total Applications</p>
+                                    <div class="mt-4 space-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                            <span class="text-sm">Screening: <span id="funnel-screening">0</span></span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 bg-amber-500 rounded-full"></div>
+                                            <span class="text-sm">Interview: <span id="funnel-interview">0</span></span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                            <span class="text-sm">Hired: <span id="funnel-hired">0</span></span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -329,7 +423,29 @@
                             </div>
                         </div>
 
-                        <!-- Column 3: Hired / Onboarding -->
+                        <!-- Column 3: Training -->
+                        <div class="flex flex-col bg-[#e8dcd5]/30 rounded-2xl border border-[#e8dcd5]">
+                            <div class="p-4 border-b border-[#e8dcd5] flex justify-between items-center bg-white/50 rounded-t-2xl">
+                                <h3 class="font-bold flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Training</h3>
+                                <span class="bg-white text-xs font-bold px-2 py-1 rounded-md border border-gray-200" id="count-Training">0</span>
+                            </div>
+                            <div class="kanban-col flex-1 p-3 overflow-y-auto space-y-3" id="col-Training" ondragover="allowDrop(event)" ondrop="drop(event, 'Training')">
+                                <!-- Cards -->
+                            </div>
+                        </div>
+
+                        <!-- Column 4: Performance Check -->
+                        <div class="flex flex-col bg-[#e8dcd5]/30 rounded-2xl border border-[#e8dcd5]">
+                            <div class="p-4 border-b border-[#e8dcd5] flex justify-between items-center bg-white/50 rounded-t-2xl">
+                                <h3 class="font-bold flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-yellow-500"></div> Performance Check</h3>
+                                <span class="bg-white text-xs font-bold px-2 py-1 rounded-md border border-gray-200" id="count-Performance Check">0</span>
+                            </div>
+                            <div class="kanban-col flex-1 p-3 overflow-y-auto space-y-3" id="col-Performance Check" ondragover="allowDrop(event)" ondrop="drop(event, 'Performance Check')">
+                                <!-- Cards -->
+                            </div>
+                        </div>
+
+                        <!-- Column 5: Hired / Onboarding -->
                         <div class="flex flex-col bg-[#e8dcd5]/30 rounded-2xl border border-[#e8dcd5]">
                             <div class="p-4 border-b border-[#e8dcd5] flex justify-between items-center bg-white/50 rounded-t-2xl">
                                 <h3 class="font-bold flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div> Hired</h3>
@@ -340,7 +456,7 @@
                             </div>
                         </div>
 
-                        <!-- Column 4: Rejected -->
+                        <!-- Column 6: Rejected -->
                         <div class="flex flex-col bg-[#e8dcd5]/30 rounded-2xl border border-[#e8dcd5]">
                             <div class="p-4 border-b border-[#e8dcd5] flex justify-between items-center bg-white/50 rounded-t-2xl">
                                 <h3 class="font-bold flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-red-500"></div> Rejected</h3>
@@ -358,12 +474,9 @@
                 <section id="jobs-view" class="admin-view max-w-6xl mx-auto">
                      <div class="mb-8 flex justify-between items-end">
                         <div>
-                            <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Job Postings</h2>
-                            <p class="text-gray-500">Manage active openings on the careers portal.</p>
+                            <h2 class="text-2xl font-serif font-bold text-[#4a332a]">Job Requisitions</h2>
+                            <p class="text-gray-500">Review and approve job requests from departments.</p>
                         </div>
-                        <button onclick="openCreateJobModal()" class="bg-[#5c4033] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4a332a] transition-colors shadow-sm">
-                            Create Posting
-                        </button>
                     </div>
 
                     <div class="grid gap-4" id="admin-jobs-list">
@@ -402,6 +515,45 @@
                                    </tr>
                                </thead>
                                <tbody class="divide-y divide-[#e8dcd5]" id="directory-table">
+                                   <!-- Injected via JS -->
+                               </tbody>
+                           </table>
+                       </div>
+                   </div>
+               </section>
+
+               <!-- 4.5. ALL EMPLOYEES VIEW -->
+               <section id="employees-view" class="admin-view max-w-6xl mx-auto">
+                   <div class="mb-8 flex justify-between items-end">
+                       <div>
+                           <h2 class="text-2xl font-serif font-bold text-[#4a332a]">All Employees Masterlist</h2>
+                           <p class="text-gray-500">Complete list of all employees, both old and new.</p>
+                       </div>
+                       <div class="flex gap-2">
+                           <button class="bg-white border border-[#e8dcd5] text-[#5c4033] px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#fdf8f5] transition-colors shadow-sm flex items-center gap-2">
+                               <i data-lucide="filter" class="w-4 h-4"></i> Filter
+                           </button>
+                           <button class="bg-white border border-[#e8dcd5] text-[#5c4033] px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#fdf8f5] transition-colors shadow-sm flex items-center gap-2">
+                               <i data-lucide="download" class="w-4 h-4"></i> Export CSV
+                           </button>
+                       </div>
+                   </div>
+
+                   <div class="bg-white border border-[#e8dcd5] rounded-2xl shadow-sm overflow-hidden">
+                       <div class="overflow-x-auto">
+                           <table class="w-full text-left text-sm">
+                               <thead class="bg-[#fdf8f5] text-gray-500 border-b border-[#e8dcd5]">
+                                   <tr>
+                                       <th class="px-6 py-4 font-medium">ID</th>
+                                       <th class="px-6 py-4 font-medium">Employee Name</th>
+                                       <th class="px-6 py-4 font-medium">Position</th>
+                                       <th class="px-6 py-4 font-medium">Contact</th>
+                                       <th class="px-6 py-4 font-medium">Hire Date</th>
+                                       <th class="px-6 py-4 font-medium">Status</th>
+                                       <th class="px-6 py-4 font-medium text-right">Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody class="divide-y divide-[#e8dcd5]" id="employees-table">
                                    <!-- Injected via JS -->
                                </tbody>
                            </table>
@@ -508,6 +660,9 @@
                         <i data-lucide="download" class="w-4 h-4"></i> Download Resume
                     </button>
                     <div class="flex gap-2">
+                        <button id="modal-edit-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 font-medium hover:bg-gray-50">Edit</button>
+                        <button id="modal-delete-btn" class="px-4 py-2 border border-red-300 rounded-lg text-red-600 font-medium hover:bg-red-50">Delete</button>
+                        <div id="modal-actions" class="flex gap-2"></div>
                         <button onclick="closeModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 font-medium hover:bg-gray-50">Close</button>
                     </div>
                 </div>
@@ -636,12 +791,35 @@
         </div>
     </div>
 
+    <!-- Email Notification Modal -->
+    <div id="email-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-[#e8dcd5] animate-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-[#e8dcd5] flex justify-between items-center bg-[#fdf8f5]">
+                <h2 class="text-xl font-serif font-bold text-[#4a332a]">Email Notification Sent</h2>
+                <button onclick="closeEmailModal()" class="text-gray-400 hover:text-gray-700 bg-white p-2 rounded-full shadow-sm">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <div class="text-sm text-gray-600 mb-2">To: <span id="email-to" class="font-medium"></span></div>
+                    <div class="text-sm text-gray-600 mb-4">Subject: <span id="email-subject" class="font-medium"></span></div>
+                    <div class="text-sm text-gray-800 bg-white p-3 rounded border" id="email-body"></div>
+                </div>
+                <div class="pt-4 flex justify-end">
+                    <button onclick="closeEmailModal()" class="bg-[#5c4033] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#4a332a] transition-colors shadow-sm">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript Logic -->
     <script>
         // --- REAL DATA ARRAYS ---
         let APPLICATIONS = [];
         let JOBS = [];
         let RECOGNITION_FEED = [];
+        let ANALYTICS = {};
 
         // --- ADMIN AUTHENTICATION SYSTEM ---
         let loggedInAdmin = null;
@@ -667,7 +845,45 @@
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            // Ensure app layout is hidden and auth layout is shown initially
+            
+            // Check for saved login session
+            const savedAdmin = localStorage.getItem('gweens_hr_admin_session');
+            if (savedAdmin) {
+                try {
+                    const adminData = JSON.parse(savedAdmin);
+                    // Verify the saved admin is still valid
+                    if (APPROVED_HR_EMAILS[adminData.email]) {
+                        loggedInAdmin = adminData;
+                        
+                        // Update UI with saved admin data
+                        document.getElementById('sidebar-name').innerText = loggedInAdmin.name;
+                        document.getElementById('dash-greeting-name').innerText = loggedInAdmin.name.split(' ')[0];
+                        document.getElementById('sidebar-role').innerText = loggedInAdmin.role;
+                        document.getElementById('sidebar-initials').innerText = loggedInAdmin.initials;
+                        
+                        // Show app layout instead of login
+                        document.getElementById('app-layout').classList.remove('hidden');
+                        document.getElementById('auth-layout').classList.add('hidden');
+                        
+                        // Load dashboard data
+                        fetchAdminData();
+                        
+                        // Restore the last viewed tab
+                        const savedView = localStorage.getItem('gweens_hr_current_view') || 'dashboard';
+                        switchAdminView(savedView);
+                        
+                        return; // Skip the default login screen setup
+                    } else {
+                        // Saved admin is no longer valid, clear it
+                        localStorage.removeItem('gweens_hr_admin_session');
+                    }
+                } catch (e) {
+                    // Invalid saved data, clear it
+                    localStorage.removeItem('gweens_hr_admin_session');
+                }
+            }
+            
+            // Default: Ensure app layout is hidden and auth layout is shown
             document.getElementById('app-layout').classList.add('hidden');
             document.getElementById('auth-layout').classList.remove('hidden');
         });
@@ -778,6 +994,9 @@
                     initials: APPROVED_HR_EMAILS[email].name.split(' ').map(n => n[0]).join('').substring(0,2)
                 };
                 
+                // Save login session to localStorage
+                localStorage.setItem('gweens_hr_admin_session', JSON.stringify(loggedInAdmin));
+                
                 // Update UI and Transition
                 document.getElementById('sidebar-name').innerText = loggedInAdmin.name;
                 document.getElementById('dash-greeting-name').innerText = loggedInAdmin.name.split(' ')[0];
@@ -810,6 +1029,9 @@
 
         function adminLogout() {
             loggedInAdmin = null;
+            // Clear saved session from localStorage
+            localStorage.removeItem('gweens_hr_admin_session');
+            localStorage.removeItem('gweens_hr_current_view');
             // Clear App view, show Auth view
             document.getElementById('app-layout').classList.add('hidden');
             document.getElementById('auth-layout').classList.remove('hidden');
@@ -823,78 +1045,255 @@
                 Promise.all([
                     fetch('admin_api.php?action=get_applicants').then(r => r.json()),
                     fetch('admin_api.php?action=get_jobs').then(r => r.json()),
-                    fetch('admin_api.php?action=get_recognition').then(r => r.json())
-                ]).then(([appData, jobData, feedData]) => {
-                    if(appData.status === 'success') APPLICATIONS = appData.data;
-                    if(jobData.status === 'success') JOBS = jobData.data;
-                    if(feedData.status === 'success') RECOGNITION_FEED = feedData.data;
+                    fetch('admin_api.php?action=get_recognition').then(r => r.json()),
+                    fetch('admin_api.php?action=get_analytics').then(r => r.json())
+                ]).then(([appData, jobData, feedData, analyticsData]) => {
+                    // Always use real data from database (don't fall back to mock data)
+                    APPLICATIONS = (appData.status === 'success' && appData.data) ? appData.data : [];
+                    JOBS = (jobData.status === 'success' && jobData.data) ? jobData.data : [];
+                    RECOGNITION_FEED = (feedData.status === 'success' && feedData.data) ? feedData.data : [];
+                    ANALYTICS = (analyticsData.status === 'success' && analyticsData.data) ? analyticsData.data : {};
+
+                    // Hide sample data indicator since we're showing real data
+                    document.getElementById('sample-data-indicator').classList.add('hidden');
+
                     refreshAllViews();
-                }).catch(error => fallbackToMockAdminData(error));
+                }).catch(error => {
+                    console.error('Error fetching data:', error);
+                    // Show empty state instead of sample data
+                    APPLICATIONS = [];
+                    JOBS = [];
+                    RECOGNITION_FEED = [];
+                    ANALYTICS = {};
+                    document.getElementById('sample-data-indicator').classList.add('hidden');
+                    refreshAllViews();
+                });
             } catch (error) {
-                fallbackToMockAdminData(error);
+                console.error('Error in fetchAdminData:', error);
+                APPLICATIONS = [];
+                JOBS = [];
+                RECOGNITION_FEED = [];
+                ANALYTICS = {};
+                document.getElementById('sample-data-indicator').classList.add('hidden');
+                refreshAllViews();
             }
         }
 
         function fallbackToMockAdminData(error) {
-            console.log('Using mock admin data (Preview Environment Fallback):', error.message || error);
+            console.log('🎯 Loading sample data for demonstration purposes...');
+            console.log('Reason:', error?.message || error || 'Database not available');
             
             JOBS = [
-                { id: 1, title: 'Senior Barista', department: 'Beverage & Service', type: 'Full-time', status: 'Active' },
-                { id: 2, title: 'Pastry Chef / Baker', department: 'Kitchen', type: 'Full-time', status: 'Active' },
-                { id: 3, title: 'Store Cashier', department: 'Front of House', type: 'Part-time', status: 'Active' }
+                { id: 1, title: 'Senior Barista', department: 'Beverage & Service', type: 'Full-time', status: 'Active', submitted_by: 'Operations Manager' },
+                { id: 2, title: 'Pastry Chef / Baker', department: 'Kitchen', type: 'Full-time', status: 'Active', submitted_by: 'Kitchen Manager' },
+                { id: 3, title: 'Store Cashier', department: 'Front of House', type: 'Part-time', status: 'Active', submitted_by: 'Store Manager' },
+                { id: 4, title: 'Kitchen Assistant', department: 'Kitchen', type: 'Full-time', status: 'Pending Approval', submitted_by: 'Kitchen Manager' },
+                { id: 5, title: 'Shift Supervisor', department: 'Operations', type: 'Full-time', status: 'Approved', submitted_by: 'Operations Manager' },
+                { id: 6, title: 'Delivery Driver', department: 'Delivery', type: 'Part-time', status: 'Rejected', submitted_by: 'Delivery Manager' },
+                { id: 7, title: 'Barista Assistant', department: 'Beverage & Service', type: 'Part-time', status: 'Pending Approval', submitted_by: 'Operations Manager' },
+                { id: 8, title: 'Cake Decorator', department: 'Kitchen', type: 'Full-time', status: 'Active', submitted_by: 'Kitchen Manager' }
             ];
 
             APPLICATIONS = [
-                { id: 'APP-001', name: 'Maria Santos', job: 'Senior Barista', date: '2026-03-01', status: 'Screening', email: 'maria@example.com', phone: '0917-123-4567', cover: 'I have 3 years experience in a busy cafe setting...' },
-                { id: 'APP-002', name: 'Mark Repardas', job: 'Pastry Chef / Baker', date: '2026-02-28', status: 'Interview', email: 'mark.r@example.com', phone: '0918-987-6543', cover: 'Graduated top of my culinary class...' },
-                { id: 'APP-003', name: 'Erica Ylagan', job: 'Store Cashier', date: '2026-02-28', status: 'Hired', email: 'erica.y@example.com', phone: '0919-555-1234', cover: 'Excellent customer service skills...',
-                  onboarding: [
-                      { task: 'Signed Employment Contract', completed: true },
-                      { task: 'Received Staff Uniform', completed: true },
-                      { task: 'Health & Safety Orientation', completed: false },
-                      { task: 'POS System Training', completed: false }
-                  ],
-                  performance: {
-                      day30: 'Completed', day60: 'Pending', day90: 'Pending', score: 85,
-                      skills: [
-                          { name: 'POS Operations', passed: true },
-                          { name: 'Customer Greeting Standard', passed: true },
-                          { name: 'End of Day Tills', passed: false }
-                      ]
-                  }
+                { 
+                    id: 'APP-001', 
+                    name: 'Maria Santos', 
+                    job: 'Senior Barista', 
+                    date: '2026-03-01', 
+                    status: 'Screening', 
+                    email: 'maria@example.com', 
+                    phone: '0917-123-4567', 
+                    cover: 'I have 3 years experience in a busy cafe setting with specialty coffee knowledge.',
+                    requesting_department: 'Beverage & Service'
                 },
-                { id: 'APP-004', name: 'John Paul', job: 'Senior Barista', date: '2026-02-27', status: 'Screening', email: 'jp@example.com', phone: '0920-111-2222', cover: 'Passionate about latte art and single origin beans.' },
-                { id: 'APP-005', name: 'Patricia Mabuti', job: 'Store Cashier', date: '2026-02-25', status: 'Rejected', email: 'patricia@example.com', phone: '0921-333-4444', cover: 'Looking for a part-time job.' },
-                { id: 'APP-006', name: 'James De Leon', job: 'Pastry Chef / Baker', date: '2026-02-20', status: 'Hired', email: 'james.d@example.com', phone: '0922-444-5555', cover: 'Love creating seasonal pastries.',
-                  onboarding: [
-                      { task: 'Signed Employment Contract', completed: true },
-                      { task: 'Received Staff Uniform', completed: true },
-                      { task: 'Health & Safety Orientation', completed: true },
-                      { task: 'Kitchen Equipment Training', completed: true }
-                  ],
-                  performance: {
-                      day30: 'Completed', day60: 'Completed', day90: 'Pending', score: 92,
-                      skills: [
-                          { name: 'Pastry Baking Consistency', passed: true },
-                          { name: 'Oven Maintenance', passed: true },
-                          { name: 'Recipe Scaling', passed: true }
-                      ]
-                  }
+                { 
+                    id: 'APP-002', 
+                    name: 'Mark Repardas', 
+                    job: 'Pastry Chef / Baker', 
+                    date: '2026-02-28', 
+                    status: 'Interview', 
+                    email: 'mark.r@example.com', 
+                    phone: '0918-987-6543', 
+                    cover: 'Graduated top of my culinary class with expertise in French pastry techniques.',
+                    requesting_department: 'Kitchen'
+                },
+                { 
+                    id: 'APP-003', 
+                    name: 'Erica Ylagan', 
+                    job: 'Store Cashier', 
+                    date: '2026-02-28', 
+                    status: 'Hired', 
+                    email: 'erica.y@example.com', 
+                    phone: '0919-555-1234', 
+                    cover: 'Excellent customer service skills with 2 years retail experience.',
+                    requesting_department: 'Front of House',
+                    onboarding: [
+                        { task: 'Signed Employment Contract', completed: true },
+                        { task: 'Provide Staff Uniform', completed: true },
+                        { task: 'Health & Safety Orientation', completed: true },
+                        { task: 'POS System Training', completed: false }
+                    ],
+                    performance: {
+                        day30: 'Completed', day60: 'Pending', day90: 'Pending', score: 85,
+                        skills: [
+                            { name: 'POS Operations', passed: true },
+                            { name: 'Customer Greeting Standard', passed: true },
+                            { name: 'End of Day Tills', passed: false }
+                        ]
+                    }
+                },
+                { 
+                    id: 'APP-004', 
+                    name: 'John Paul', 
+                    job: 'Senior Barista', 
+                    date: '2026-02-27', 
+                    status: 'Training', 
+                    email: 'jp@example.com', 
+                    phone: '0920-111-2222', 
+                    cover: 'Passionate about latte art and single origin beans. 4 years experience.',
+                    requesting_department: 'Beverage & Service'
+                },
+                { 
+                    id: 'APP-005', 
+                    name: 'Patricia Mabuti', 
+                    job: 'Store Cashier', 
+                    date: '2026-02-25', 
+                    status: 'Rejected', 
+                    email: 'patricia@example.com', 
+                    phone: '0921-333-4444', 
+                    cover: 'Looking for a part-time job with flexible hours.',
+                    requesting_department: 'Front of House'
+                },
+                { 
+                    id: 'APP-006', 
+                    name: 'James De Leon', 
+                    job: 'Pastry Chef / Baker', 
+                    date: '2026-02-20', 
+                    status: 'Performance Check', 
+                    email: 'james.d@example.com', 
+                    phone: '0922-444-5555', 
+                    cover: 'Love creating seasonal pastries. 5 years in professional baking.',
+                    requesting_department: 'Kitchen'
+                },
+                { 
+                    id: 'APP-007', 
+                    name: 'Ana Reyes', 
+                    job: 'Kitchen Assistant', 
+                    date: '2026-03-10', 
+                    status: 'Screening', 
+                    email: 'ana.r@example.com', 
+                    phone: '0923-777-8888', 
+                    cover: 'Eager to learn kitchen operations and contribute to a great team.',
+                    requesting_department: 'Kitchen'
+                },
+                { 
+                    id: 'APP-008', 
+                    name: 'Carlos Mendoza', 
+                    job: 'Shift Supervisor', 
+                    date: '2026-03-08', 
+                    status: 'Interview', 
+                    email: 'carlos.m@example.com', 
+                    phone: '0924-999-0000', 
+                    cover: '3 years supervisory experience in food service industry.',
+                    requesting_department: 'Operations'
+                },
+                { 
+                    id: 'APP-009', 
+                    name: 'Liza Torres', 
+                    job: 'Delivery Driver', 
+                    date: '2026-03-05', 
+                    status: 'Hired', 
+                    email: 'liza.t@example.com', 
+                    phone: '0925-111-2222', 
+                    cover: 'Reliable driver with clean record and excellent navigation skills.',
+                    requesting_department: 'Delivery',
+                    onboarding: [
+                        { task: 'Signed Employment Contract', completed: true },
+                        { task: 'Provide Staff Uniform', completed: true },
+                        { task: 'Vehicle Safety Training', completed: true },
+                        { task: 'Delivery Route Training', completed: false }
+                    ],
+                    performance: {
+                        day30: 'Completed', day60: 'Pending', day90: 'Pending', score: 88,
+                        skills: [
+                            { name: 'Safe Driving', passed: true },
+                            { name: 'Customer Service', passed: true },
+                            { name: 'Time Management', passed: false }
+                        ]
+                    }
+                },
+                { 
+                    id: 'APP-010', 
+                    name: 'Roberto Cruz', 
+                    job: 'Senior Barista', 
+                    date: '2026-02-15', 
+                    status: 'Hired', 
+                    email: 'roberto.c@example.com', 
+                    phone: '0926-333-4444', 
+                    cover: 'Master barista with competition experience and latte art expertise.',
+                    requesting_department: 'Beverage & Service',
+                    onboarding: [
+                        { task: 'Signed Employment Contract', completed: true },
+                        { task: 'Provide Staff Uniform', completed: true },
+                        { task: 'Espresso Machine Training', completed: true },
+                        { task: 'Advanced Latte Art', completed: true }
+                    ],
+                    performance: {
+                        day30: 'Completed', day60: 'Completed', day90: 'Completed', score: 95,
+                        skills: [
+                            { name: 'Espresso Quality', passed: true },
+                            { name: 'Customer Experience', passed: true },
+                            { name: 'Inventory Management', passed: true }
+                        ]
+                    }
+                },
+                { 
+                    id: 'APP-011', 
+                    name: 'Sofia Garcia', 
+                    job: 'Store Cashier', 
+                    date: '2026-03-12', 
+                    status: 'Training', 
+                    email: 'sofia.g@example.com', 
+                    phone: '0927-555-6666', 
+                    cover: 'Detail-oriented with excellent math skills and customer service experience.',
+                    requesting_department: 'Front of House'
+                },
+                { 
+                    id: 'APP-012', 
+                    name: 'Miguel Santos', 
+                    job: 'Delivery Driver', 
+                    date: '2026-03-08', 
+                    status: 'Performance Check', 
+                    email: 'miguel.s@example.com', 
+                    phone: '0928-777-8888', 
+                    cover: 'Safe driver with GPS navigation experience and clean driving record.',
+                    requesting_department: 'Delivery'
                 }
             ];
 
             RECOGNITION_FEED = [
-                { id: 1, type: 'welcome', author: 'HR Team', target_name: 'Erica Ylagan', role: 'Store Cashier', time: '2 hours ago', message: 'Welcome to the Gween\'s Bake n Brew family! We are excited to see you shine at the front counter.', icon: 'hand-metal' },
-                { id: 2, type: 'kudos', author: 'John Rey', target_name: 'James De Leon', badge: 'Fast Learner', time: '1 day ago', message: 'James mastered the new oven settings on his first try! Amazing work.', icon: 'zap' },
-                { id: 3, type: 'welcome', author: 'HR Team', target_name: 'James De Leon', role: 'Pastry Chef', time: '1 week ago', message: 'Let\'s all give a warm welcome to James, our newest Pastry Chef!', icon: 'party-popper' },
-                { id: 4, type: 'kudos', author: 'Patricia', target_name: 'Erica Ylagan', badge: 'Team Player', time: '3 hours ago', message: 'Thanks for helping me cover the rush hour shift today!', icon: 'users' }
+                { id: 1, type: 'welcome', author_name: 'HR Team', target_applicant_id: 'APP-003', target_name: 'Erica Ylagan', role: 'Store Cashier', time: '2 hours ago', message: 'Welcome to the Gween\'s Bake n Brew family! We are excited to see you shine at the front counter.', icon: 'hand-metal' },
+                { id: 2, type: 'kudos', author_name: 'John Rey', target_applicant_id: 'APP-006', target_name: 'James De Leon', badge: 'Fast Learner', time: '1 day ago', message: 'James mastered the new oven settings on his first try! Amazing work.', icon: 'zap' },
+                { id: 3, type: 'welcome', author_name: 'HR Team', target_applicant_id: 'APP-006', target_name: 'James De Leon', role: 'Pastry Chef', time: '1 week ago', message: 'Let\'s all give a warm welcome to James, our newest Pastry Chef!', icon: 'party-popper' },
+                { id: 4, type: 'kudos', author_name: 'Patricia', target_applicant_id: 'APP-003', target_name: 'Erica Ylagan', badge: 'Team Player', time: '3 hours ago', message: 'Thanks for helping me cover the rush hour shift today!', icon: 'users' },
+                { id: 5, type: 'welcome', author_name: 'HR Team', target_applicant_id: 'APP-009', target_name: 'Liza Torres', role: 'Delivery Driver', time: '5 days ago', message: 'Welcome aboard, Liza! Safe travels and happy deliveries!', icon: 'truck' },
+                { id: 6, type: 'kudos', author_name: 'Operations Manager', target_applicant_id: 'APP-010', target_name: 'Roberto Cruz', badge: 'Star Performer', time: '2 days ago', message: 'Roberto\'s latte art won us first place in the local competition!', icon: 'trophy' },
+                { id: 7, type: 'welcome', author_name: 'HR Team', target_applicant_id: 'APP-011', target_name: 'Sofia Garcia', role: 'Store Cashier', time: '1 hour ago', message: 'Welcome to the training program, Sofia! We\'re excited to have you on board.', icon: 'graduation-cap' },
+                { id: 8, type: 'kudos', author_name: 'Delivery Manager', target_applicant_id: 'APP-012', target_name: 'Miguel Santos', badge: 'Safety First', time: '4 hours ago', message: 'Miguel completed his safety training with perfect scores! Great work.', icon: 'shield-check' }
             ];
+
+            // Show sample data indicator
+            document.getElementById('sample-data-indicator').classList.remove('hidden');
+            lucide.createIcons();
 
             refreshAllViews();
         }
 
         // --- APP NAVIGATION ---
         function switchAdminView(viewId) {
+            // Save current view to localStorage
+            localStorage.setItem('gweens_hr_current_view', viewId);
+            
             document.querySelectorAll('.admin-view').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-[#fdf8f5]', 'text-[#5c4033]');
@@ -911,6 +1310,7 @@
 
             if(viewId === 'dashboard') renderDashboard();
             if(viewId === 'directory') renderDirectory();
+            if(viewId === 'employees') renderEmployees();
             if(viewId === 'onboarding') renderOnboarding();
             if(viewId === 'performance') renderPerformance();
             if(viewId === 'recognition') renderRecognition();
@@ -923,6 +1323,7 @@
             renderKanban();
             renderJobs();
             renderDirectory();
+            renderEmployees();
             renderOnboarding();
             renderPerformance();
             renderRecognition();
@@ -940,9 +1341,33 @@
         }
 
         function renderDashboard() {
-            document.getElementById('stat-total').innerText = APPLICATIONS.length;
-            document.getElementById('stat-review').innerText = APPLICATIONS.filter(a => a.status === 'Screening').length;
-            document.getElementById('stat-hired').innerText = APPLICATIONS.filter(a => a.status === 'Hired').length;
+            document.getElementById('stat-total').innerText = ANALYTICS.total_applicants || 0;
+            document.getElementById('stat-review').innerText = ANALYTICS.screening || 0;
+            document.getElementById('stat-hired').innerText = ANALYTICS.hired || 0;
+            document.getElementById('stat-rejected').innerText = ANALYTICS.rejected || 0;
+
+            // Update charts
+            const total = ANALYTICS.total_applicants || 1; // Avoid division by zero
+            document.getElementById('chart-screening').innerText = ANALYTICS.screening || 0;
+            document.getElementById('chart-interview').innerText = ANALYTICS.interview || 0;
+            document.getElementById('chart-training').innerText = ANALYTICS.training || 0;
+            document.getElementById('chart-performance').innerText = ANALYTICS.performance_check || 0;
+            document.getElementById('chart-hired').innerText = ANALYTICS.hired || 0;
+            document.getElementById('chart-rejected').innerText = ANALYTICS.rejected || 0;
+
+            // Update bar widths
+            document.querySelector('.bg-blue-500').style.width = `${((ANALYTICS.screening || 0) / total) * 100}%`;
+            document.querySelector('.bg-amber-500').style.width = `${((ANALYTICS.interview || 0) / total) * 100}%`;
+            document.querySelector('.bg-purple-500').style.width = `${((ANALYTICS.training || 0) / total) * 100}%`;
+            document.querySelector('.bg-orange-500').style.width = `${((ANALYTICS.performance_check || 0) / total) * 100}%`;
+            document.querySelector('.bg-green-500').style.width = `${((ANALYTICS.hired || 0) / total) * 100}%`;
+            document.querySelector('.bg-red-500').style.width = `${((ANALYTICS.rejected || 0) / total) * 100}%`;
+
+            // Funnel
+            document.getElementById('funnel-total').innerText = ANALYTICS.total_applicants || 0;
+            document.getElementById('funnel-screening').innerText = ANALYTICS.screening || 0;
+            document.getElementById('funnel-interview').innerText = ANALYTICS.interview || 0;
+            document.getElementById('funnel-hired').innerText = ANALYTICS.hired || 0;
 
             const tbody = document.getElementById('recent-applications-table');
             if(APPLICATIONS.length === 0) {
@@ -969,7 +1394,7 @@
         }
 
         function renderKanban() {
-            const columns = ['Screening', 'Interview', 'Hired', 'Rejected'];
+            const columns = ['Screening', 'Interview', 'Training', 'Performance Check', 'Hired', 'Rejected'];
             
             columns.forEach(col => {
                 const colData = APPLICATIONS.filter(a => a.status === col);
@@ -1009,14 +1434,19 @@
                         </div>
                         <div>
                             <h4 class="font-bold text-lg text-[#4a332a]">${job.title}</h4>
-                            <p class="text-sm text-gray-500">${job.department} • ${job.type}</p>
+                            <p class="text-sm text-gray-500">${job.department} • ${job.type} • Submitted by: ${job.submitted_by}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full border border-green-200">${job.status}</span>
+                        <span class="px-3 py-1 ${job.status === 'Pending Approval' ? 'bg-yellow-100 text-yellow-700' : job.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} text-xs font-bold rounded-full border">${job.status}</span>
                         <div class="flex gap-2">
-                            <button class="p-2 text-gray-400 hover:text-[#5c4033] bg-gray-50 rounded-lg border border-gray-200"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                            <button class="p-2 text-gray-400 hover:text-red-500 bg-gray-50 rounded-lg border border-gray-200"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            ${job.status === 'Pending Approval' ? `
+                                <button onclick="approveJob(${job.id})" class="p-2 text-green-600 hover:text-green-700 bg-green-50 rounded-lg border border-green-200"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                <button onclick="rejectJob(${job.id})" class="p-2 text-red-600 hover:text-red-700 bg-red-50 rounded-lg border border-red-200"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            ` : `
+                                <button class="p-2 text-gray-400 hover:text-[#5c4033] bg-gray-50 rounded-lg border border-gray-200"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                <button class="p-2 text-gray-400 hover:text-red-500 bg-gray-50 rounded-lg border border-gray-200"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            `}
                         </div>
                     </div>
                 </div>
@@ -1042,6 +1472,36 @@
                     <td class="px-6 py-4">
                         <span class="px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(app.status)}">
                             ${app.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="openModal('${app.id}')" class="text-[#8b6b5d] hover:text-[#5c4033] font-medium bg-white border border-[#e8dcd5] px-3 py-1.5 rounded-lg shadow-sm transition-colors">View Profile</button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderEmployees() {
+            const tbody = document.getElementById('employees-table');
+            const employees = APPLICATIONS.filter(app => app.status === 'Hired');
+            tbody.innerHTML = employees.map(app => `
+                <tr class="hover:bg-[#fdf8f5]/50 transition-colors">
+                    <td class="px-6 py-4 text-gray-400 font-medium">${app.id}</td>
+                    <td class="px-6 py-4 font-bold text-[#4a332a]">${app.name}</td>
+                    <td class="px-6 py-4 text-gray-600">
+                        <span class="bg-[#fdf8f5] text-[#8b6b5d] px-2 py-1 rounded text-xs font-medium border border-[#f0e4dd]">${app.job}</span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">
+                        <div class="flex flex-col gap-1">
+                            <span class="flex items-center gap-1.5"><i data-lucide="mail" class="w-3 h-3 text-[#8b6b5d]"></i> ${app.email}</span>
+                            <span class="flex items-center gap-1.5"><i data-lucide="phone" class="w-3 h-3 text-[#8b6b5d]"></i> ${app.phone}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">${app.date}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                            Active
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right">
@@ -1278,39 +1738,7 @@
 
                     // Automatically assign an onboarding checklist & performance data if moved to "Hired"
                     if (newStatus === 'Hired') {
-                        if (!APPLICATIONS[appIndex].onboarding) {
-                            APPLICATIONS[appIndex].onboarding = [
-                                { task: 'Signed Employment Contract', completed: false },
-                                { task: 'Received Staff Uniform', completed: false },
-                                { task: 'Health & Safety Orientation', completed: false },
-                                { task: 'Role Specific Training', completed: false }
-                            ];
-                        }
-                        if (!APPLICATIONS[appIndex].performance) {
-                            APPLICATIONS[appIndex].performance = {
-                                day30: 'Pending', day60: 'Pending', day90: 'Pending', score: 0,
-                                skills: [
-                                    { name: 'Initial Workflow Grasp', passed: false },
-                                    { name: 'Team Communication', passed: false },
-                                    { name: 'Customer Service Standard', passed: false }
-                                ]
-                            };
-                        }
-
-                        // Generate a welcome post mock logic
-                    const exists = RECOGNITION_FEED.find(post => post.target_name === APPLICATIONS[appIndex].name && post.type === 'welcome');
-                        if(!exists) {
-                            RECOGNITION_FEED.unshift({
-                                id: Date.now(),
-                                type: 'welcome',
-                                author: 'System',
-                            target_name: APPLICATIONS[appIndex].name,
-                                role: APPLICATIONS[appIndex].job,
-                                time: 'Just now',
-                                message: `Let's all give a warm welcome to ${APPLICATIONS[appIndex].name}, our newest ${APPLICATIONS[appIndex].job}!`,
-                                icon: 'party-popper'
-                            });
-                        }
+                        // Removed automatic setup, now done in API only after approval
                     }
 
                     // Re-render UI
@@ -1327,6 +1755,18 @@
                         .then(data => {
                             if(data.status !== 'success') {
                                 console.error('Error updating status on server:', data.message);
+                                // Revert the local change and refresh data
+                                APPLICATIONS[appIndex].status = APPLICATIONS[appIndex].status; // Keep original status
+                                refreshAllViews();
+                                fetchAdminData(); // Refresh from server
+                                alert('Error updating applicant status: ' + data.message);
+                            } else {
+                                const app = APPLICATIONS.find(a => a.id == draggedAppId);
+                                if (newStatus === 'Interview') {
+                                    showEmailModal(app.email, 'Interview Scheduled', 'Your interview has been scheduled. Please check your email for details.');
+                                } else if (newStatus === 'Rejected') {
+                                    showEmailModal(app.email, 'Application Update', 'We regret to inform you that your application has been rejected.');
+                                }
                             }
                         })
                         .catch(e => console.log('Mocking status update (Fallback):', e));
@@ -1358,11 +1798,189 @@
                 resumeBtn.classList.add('opacity-50', 'cursor-not-allowed');
             }
 
+            // Set up Edit and Delete button handlers
+            document.getElementById('modal-edit-btn').onclick = () => editApplicant(appId);
+            document.getElementById('modal-delete-btn').onclick = () => deleteApplicant(appId);
+
+            // Action Buttons based on status
+            const actionsDiv = document.getElementById('modal-actions');
+            actionsDiv.innerHTML = '';
+            if (app.status === 'Screening') {
+                const scheduleBtn = document.createElement('button');
+                scheduleBtn.innerText = 'Schedule Interview';
+                scheduleBtn.className = 'px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600';
+                scheduleBtn.onclick = () => scheduleInterview(app.id);
+                actionsDiv.appendChild(scheduleBtn);
+            } else if (app.status === 'Interview') {
+                const sendBtn = document.createElement('button');
+                sendBtn.innerText = 'Send to Training';
+                sendBtn.className = 'px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600';
+                sendBtn.onclick = () => sendToTraining(app.id);
+                actionsDiv.appendChild(sendBtn);
+            } else if (app.status === 'Performance Check') {
+                const approveBtn = document.createElement('button');
+                approveBtn.innerText = 'Approve Hire';
+                approveBtn.className = 'px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600';
+                approveBtn.onclick = () => approvePerformance(app.id);
+                actionsDiv.appendChild(approveBtn);
+            }
+
             document.getElementById('applicant-modal').classList.remove('hidden');
         }
 
         function closeModal() {
             document.getElementById('applicant-modal').classList.add('hidden');
+        }
+
+        function editApplicant(appId) {
+            const app = APPLICATIONS.find(a => a.id == appId);
+            if (!app) return;
+
+            // Create edit form
+            const editForm = document.createElement('div');
+            editForm.className = 'fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            editForm.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-[#e8dcd5]">
+                    <div class="p-6 border-b border-[#e8dcd5] bg-[#fdf8f5]">
+                        <h2 class="text-xl font-serif font-bold text-[#4a332a]">Edit Applicant</h2>
+                    </div>
+                    <form onsubmit="saveApplicantEdit(event, '${appId}')" class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <input type="text" id="edit-full-name" value="${app.name}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8b6b5d] focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="edit-email" value="${app.email}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8b6b5d] focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                            <input type="text" id="edit-phone" value="${app.phone}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8b6b5d] focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Cover Letter</label>
+                            <textarea id="edit-cover" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8b6b5d] focus:border-transparent">${app.cover || ''}</textarea>
+                        </div>
+                        <div class="flex gap-3 pt-4">
+                            <button type="submit" class="flex-1 bg-[#8b6b5d] text-white py-2 px-4 rounded-lg hover:bg-[#6d513f] font-medium">Save Changes</button>
+                            <button type="button" onclick="this.closest('.fixed').remove()" class="flex-1 border border-gray-300 py-2 px-4 rounded-lg hover:bg-gray-50 font-medium">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(editForm);
+        }
+
+        function saveApplicantEdit(event, appId) {
+            event.preventDefault();
+
+            const fullName = document.getElementById('edit-full-name').value;
+            const email = document.getElementById('edit-email').value;
+            const phone = document.getElementById('edit-phone').value;
+            const coverLetter = document.getElementById('edit-cover').value;
+
+            fetch('admin_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'edit_applicant',
+                    id: appId,
+                    full_name: fullName,
+                    email: email,
+                    phone: phone,
+                    cover_letter: coverLetter
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    event.target.closest('.fixed').remove();
+                    closeModal();
+                    fetchAdminData();
+                    alert('Applicant updated successfully!');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        function deleteApplicant(appId) {
+            if (!confirm('Are you sure you want to delete this applicant? This action cannot be undone.')) {
+                return;
+            }
+
+            fetch('admin_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'delete_applicant', id: appId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    closeModal();
+                    fetchAdminData();
+                    alert('Applicant deleted successfully!');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        function scheduleInterview(appId) {
+            const app = APPLICATIONS.find(a => a.id == appId);
+            fetch('admin_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'update_status', id: appId, status: 'Interview' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    closeModal();
+                    fetchAdminData();
+                    showEmailModal(app.email, 'Interview Scheduled', 'Your interview has been scheduled. Please check your email for details.');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        function sendToTraining(appId) {
+            const app = APPLICATIONS.find(a => a.id == appId);
+            fetch('admin_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'send_to_training', id: appId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    closeModal();
+                    fetchAdminData();
+                    showEmailModal(app.email, 'Training Scheduled', 'You have been selected for training. Please await further instructions.');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        function approvePerformance(appId) {
+            const app = APPLICATIONS.find(a => a.id == appId);
+            fetch('admin_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'approve_performance', id: appId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    closeModal();
+                    fetchAdminData();
+                    showEmailModal(app.email, 'Hired!', 'Congratulations! You have passed the performance check and are now hired.');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
         }
 
         // Close modal when clicking outside
@@ -1379,11 +1997,27 @@
             document.getElementById('create-job-modal').classList.add('hidden');
         }
 
+        function approveJob(jobId) {
+            fetch('admin_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'approve_job', job_id: jobId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    fetchAdminData();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
         function handleCreateJob(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
             const jobData = Object.fromEntries(formData.entries());
-            jobData.action = 'create_job';
+            jobData.action = 'submit_job';
 
             fetch('admin_api.php', {
                 method: 'POST',
@@ -1470,6 +2104,17 @@
 
         function closeKudosModal() {
             document.getElementById('kudos-modal').classList.add('hidden');
+        }
+
+        function closeEmailModal() {
+            document.getElementById('email-modal').classList.add('hidden');
+        }
+
+        function showEmailModal(to, subject, body) {
+            document.getElementById('email-to').innerText = to;
+            document.getElementById('email-subject').innerText = subject;
+            document.getElementById('email-body').innerText = body;
+            document.getElementById('email-modal').classList.remove('hidden');
         }
 
         function handleKudosSubmit(e) {

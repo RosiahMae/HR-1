@@ -551,9 +551,66 @@
         function fallbackToMockJobs(error) {
             console.log('Using mock job data (Preview Environment Fallback):', error.message || error);
             JOB_LISTINGS = [
-                { id: 1, title: 'Senior Barista', department: 'Beverage & Service', location: 'Quezon City', type: 'Full-time', salary: '₱18,000 - ₱25,000', description: 'Looking for an experienced barista...' },
-                { id: 2, title: 'Pastry Chef / Baker', department: 'Kitchen', location: 'Quezon City', type: 'Full-time', salary: '₱20,000 - ₱30,000', description: 'Join our kitchen team to create the finest baked goods...' },
-                { id: 3, title: 'Store Cashier', department: 'Front of House', location: 'Quezon City', type: 'Part-time', salary: '₱12,000 - ₱15,000', description: 'Friendly cashier needed...' }
+                { 
+                    id: 1, 
+                    title: 'Senior Barista', 
+                    department: 'Beverage & Service', 
+                    location: 'Quezon City', 
+                    type: 'Full-time', 
+                    salary: '₱18,000 - ₱25,000', 
+                    description: 'We are looking for an experienced barista to join our team at Gween\'s Bake n Brew. The ideal candidate should have at least 2 years of experience in specialty coffee preparation, latte art skills, and excellent customer service. Responsibilities include preparing high-quality espresso-based drinks, maintaining equipment, and providing exceptional customer experiences.',
+                    status: 'Active'
+                },
+                { 
+                    id: 2, 
+                    title: 'Pastry Chef / Baker', 
+                    department: 'Kitchen', 
+                    location: 'Quezon City', 
+                    type: 'Full-time', 
+                    salary: '₱20,000 - ₱30,000', 
+                    description: 'Join our award-winning kitchen team as a Pastry Chef. You will be responsible for creating artisanal pastries, cakes, and desserts using traditional and modern techniques. The role requires creativity, attention to detail, and the ability to work in a fast-paced environment. Experience with French pastry techniques is preferred.',
+                    status: 'Active'
+                },
+                { 
+                    id: 3, 
+                    title: 'Store Cashier', 
+                    department: 'Front of House', 
+                    location: 'Quezon City', 
+                    type: 'Part-time', 
+                    salary: '₱12,000 - ₱15,000', 
+                    description: 'We need friendly and reliable cashiers to handle customer transactions, maintain the front area, and provide excellent service. This position involves operating the POS system, handling cash and card payments, and assisting customers with their orders. No experience required - we provide full training.',
+                    status: 'Active'
+                },
+                { 
+                    id: 4, 
+                    title: 'Kitchen Assistant', 
+                    department: 'Kitchen', 
+                    location: 'Quezon City', 
+                    type: 'Full-time', 
+                    salary: '₱15,000 - ₱18,000', 
+                    description: 'Support our kitchen operations by assisting with food preparation, maintaining cleanliness, and ensuring smooth workflow. This entry-level position is perfect for someone looking to start a career in the food service industry. Training will be provided for all kitchen procedures and safety protocols.',
+                    status: 'Active'
+                },
+                { 
+                    id: 5, 
+                    title: 'Shift Supervisor', 
+                    department: 'Operations', 
+                    location: 'Quezon City', 
+                    type: 'Full-time', 
+                    salary: '₱22,000 - ₱28,000', 
+                    description: 'Lead our team during shifts, ensuring excellent customer service and smooth operations. The Shift Supervisor oversees staff performance, handles customer concerns, manages inventory, and maintains store standards. Previous supervisory experience in retail or food service is preferred.',
+                    status: 'Active'
+                },
+                { 
+                    id: 6, 
+                    title: 'Delivery Driver', 
+                    department: 'Delivery', 
+                    location: 'Quezon City', 
+                    type: 'Part-time', 
+                    salary: '₱14,000 - ₱16,000', 
+                    description: 'Deliver our delicious baked goods and coffee to customers throughout Quezon City. You will need a valid driver\'s license, good knowledge of local areas, and excellent customer service skills. A clean driving record is required. Vehicle provided.',
+                    status: 'Active'
+                }
             ];
             document.getElementById('job-count').innerText = `${JOB_LISTINGS.length} Roles Available`;
             renderJobs();

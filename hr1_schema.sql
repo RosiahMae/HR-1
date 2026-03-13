@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     type VARCHAR(50) NOT NULL,
     salary VARCHAR(100),
     description TEXT,
-    status ENUM('Active', 'Closed') DEFAULT 'Active',
+    status ENUM('Pending Approval', 'Approved', 'Rejected', 'Active', 'Closed') DEFAULT 'Pending Approval',
+    submitted_by VARCHAR(100), -- Department that submitted the job posting
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- Rename/align applications => `applicants` (used by api.php/admin_api.php)
@@ -23,8 +24,9 @@ CREATE TABLE IF NOT EXISTS applicants (
     phone VARCHAR(50) NOT NULL,
     cover_letter TEXT,
     resume_path VARCHAR(255),
-    status ENUM('Screening', 'Interview', 'Hired', 'Rejected') DEFAULT 'Screening',
+    status ENUM('Screening', 'Interview', 'Training', 'Performance Check', 'Hired', 'Rejected') DEFAULT 'Screening',
     password_hash VARCHAR(255) NULL,
+    requesting_department VARCHAR(100), -- Department requesting the applicant
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
